@@ -1,0 +1,92 @@
+[
+  {
+    "id": "AUTH-002",
+    "title": "SSH root login",
+    "description": "Root authentication through an SSH event was observed.",
+    "severity": "high",
+    "risk": 80,
+    "enabled": true,
+    "tactic": "Initial Access",
+    "technique": "T1078 Valid Accounts",
+    "conditions": {
+      "event_type": [
+        "login_success",
+        "ssh_login"
+      ],
+      "user": [
+        "root"
+      ]
+    }
+  },
+  {
+    "id": "NET-001",
+    "title": "Suspicious network connection",
+    "description": "A suspicious outbound network connection was observed.",
+    "severity": "medium",
+    "risk": 50,
+    "enabled": true,
+    "tactic": "Command and Control",
+    "technique": "T1071 Application Layer Protocol",
+    "conditions": {
+      "event_type": [
+        "network_connection"
+      ],
+      "process": [
+        "nc",
+        "netcat",
+        "curl",
+        "wget"
+      ]
+    }
+  },
+  {
+    "id": "NET-002",
+    "title": "Network reconnaissance / port scan",
+    "description": "Multiple TCP destination ports were probed on the monitored host from the same source.",
+    "severity": "high",
+    "risk": 82,
+    "enabled": true,
+    "tactic": "Discovery",
+    "technique": "T1046 Network Service Scanning",
+    "conditions": {
+      "event_type": [
+        "port_scan",
+        "network_recon"
+      ]
+    }
+  },
+  {
+    "id": "AUTH-003",
+    "title": "Successful root login",
+    "description": "A successful authentication event for the root account was observed.",
+    "severity": "high",
+    "risk": 85,
+    "enabled": true,
+    "tactic": "Initial Access",
+    "technique": "T1078 Valid Accounts",
+    "conditions": {
+      "event_type": [
+        "login_success",
+        "ssh_login"
+      ],
+      "user": [
+        "root"
+      ]
+    }
+  },
+  {
+    "id": "PRIV-001",
+    "title": "Privilege escalation / change",
+    "description": "A privilege escalation or privilege change event was observed on the monitored host.",
+    "severity": "high",
+    "risk": 88,
+    "enabled": true,
+    "tactic": "Privilege Escalation",
+    "technique": "T1548 Abuse Elevation Control Mechanism",
+    "conditions": {
+      "event_type": [
+        "privilege_change"
+      ]
+    }
+  }
+]

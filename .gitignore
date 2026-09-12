@@ -1,0 +1,42 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+
+# Local databases and runtime data
+data/*.db
+data/*.db-*
+*.sqlite
+*.sqlite3
+*.log
+logs/
+*.pid
+
+# Local backup files
+*.backup
+*.bak
+*.broken-backup
+*.syntax-error-backup
+*.before-*
+
+# Secrets / environment files
+.env
+.env.*
+!.env.example
+
+# IDE / OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Frontend dependencies/build output
+node_modules/
+dist/
+build/
+
+# Command Guard runtime state and event history
+data/command_guard.json
+data/command_guard_allowlist.json
+data/command_guard_events.jsonl

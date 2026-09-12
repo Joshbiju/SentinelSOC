@@ -1,0 +1,622 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SentinelSOC Command Center</title><link rel="stylesheet" href="/static/style.css"><script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script></head><body>
+<div class="app-shell"><aside class="sidebar"><div class="brand">SentinelSOC</div><div class="brand-sub">Security Operations<br>Center</div><nav>
+<button class="nav active" onclick="showTab('overview',this)">▦ <span>Dashboard</span></button><button class="nav" onclick="showTab('alerts',this)">♢ <span>Alerts</span></button><button class="nav" onclick="showTab('incidents',this)">♧ <span>Incidents</span></button><button class="nav" onclick="showTab('campaigns',this)">◉ <span>Attack Campaigns</span></button><button class="nav" onclick="showTab('assets',this)">▤ <span>Assets</span></button><button class="nav" onclick="showTab('intel',this)">◎ <span>Threat Intel</span></button><button class="nav" onclick="showTab('blocked',this)">⊘ <span>IP Management</span></button><button class="nav" onclick="showTab('reports',this)">▧ <span>Reports</span></button><button class="nav" onclick="showTab('settings',this)">⚙ <span>Settings</span></button>
+<button class="nav-item" onclick="showTab('command-guard')" data-tab="command-guard">
+  <span>◈</span> Command Guard
+</button>
+</nav></aside>
+<section class="content"><header class="topbar"><div><strong>Security Operations<br>Center</strong><small>Enterprise Monitoring Platform</small></div><div class="top-actions"><input id="globalSearch" placeholder="⌕  Search events, IPs..." oninput="loadEvents()"><span class="live-pill">◉ LIVE</span><div><b>SOC<br>Analyst</b><small>Online</small></div></div></header><main>
+<section id="overview" class="tab"><div class="eyebrow">⌁ SECURITY OPERATIONS CENTER</div><div class="hero"><div><h1>SentinelSOC Command Center</h1><p>Real-time detection, investigation and response.</p></div><span class="online-dot">● SYSTEM ONLINE</span></div>
+<div class="filterbar"><span id="filterState">No drill-down filter</span><button onclick="clearFilter()">Clear filter</button></div>
+<div class="cards"><div><label>Total Events <i></i></label><b id="totalEvents">0</b><small>Unified telemetry <em>▲ Live</em></small></div><div><label>Active Alerts <i></i></label><b id="active">0</b><small id="criticalText">0 Critical <em>▲ Live</em></small></div><div><label>Unique IPs <i></i></label><b id="uniqueIPs" class="cyan">0</b><small>Observed sources <em>▲ Live</em></small></div><div><label>Detection Engine <i></i></label><b class="green">ACTIVE</b><small>Rule + correlation engine <em>▲ Live</em></small></div><div><label>Total Alerts <i></i></label><b id="totalAlerts">0</b><small id="resolvedText">0 Resolved <em>▲ Live</em></small></div><div><label>Critical / High <i></i></label><b class="red" id="priority">0</b><small>Priority queue <em>▲ Live</em></small></div><div><label>Monitored Assets <i></i></label><b class="cyan">1</b><small>Native agentless collector <em>▲ Live</em></small></div><div><label>Threat Intel <i></i></label><b class="purple" id="intelN">0</b><small>Known indicators <em>▲ Live</em></small></div></div>
+<div class="chart-grid"><div class="panel"><div class="panel-head"><h2>Event Frequency — Last 24 Hours</h2><span class="muted">Z-score anomaly ≥ 2.5</span></div><canvas id="trendChart"></canvas></div><div class="panel"><div class="panel-head"><h2>Alert Severity</h2></div><canvas id="severityChart"></canvas></div></div>
+<div class="two-col"><div class="panel"><h2>⚠ Top Attack Types</h2><div id="attackTypes" class="empty">Waiting for security events</div></div><div class="panel"><h2>◎ Top Source IPs</h2><div id="sources" class="list"></div></div></div>
+<div class="panel"><div class="panel-head"><h2>⌁ Live Security Events</h2><button onclick="showTab('events')">View all</button></div><div id="live"></div></div></section>
+<section id="events" class="tab hidden"><div class="panel"><div class="panel-head"><h2>Event Explorer</h2><span id="eventFilterLabel" class="muted"></span></div><div id="eventTable"></div></div></section>
+<section id="alerts" class="tab hidden"><div class="panel"><div class="panel-head"><h2>Alert Queue / L1 Triage</h2><span class="live-pill">REAL TIME</span></div><div id="alertTable"></div></div></section>
+<section id="incidents" class="tab hidden"><div class="panel"><div class="panel-head"><h2>Incident Triage — Kanban</h2><button type="button" onclick="createIncident()">+ New Incident</button></div><div id="incidentBoard" class="kanban"></div></div></section>
+<section id="campaigns" class="tab hidden">
+  <div class="panel campaign-panel">
+    <div class="panel-head campaign-head">
+      <div>
+        <h2>Attack Campaigns</h2>
+        <span class="muted">Authorized lab detection scenarios</span>
+      </div>
+      <span class="live-pill">REAL TELEMETRY</span>
+    </div>
+
+    <div class="campaign-notice">
+      <span class="campaign-notice-icon">◉</span>
+      <div>
+        <strong>Detection validation environment</strong>
+        <p>No fake alerts are generated. Campaigns become active only when real monitored telemetry satisfies the detection logic.</p>
+      </div>
+    </div>
+
+    <div class="campaign-grid">
+
+      <article class="campaign-card" data-campaign="bruteforce">
+        <div class="campaign-card-top">
+          <span class="campaign-icon">⚠</span>
+          <span id="campaignStatusBrute" class="campaign-status monitoring">MONITORING</span>
+        </div>
+        <h3>SSH Brute Force</h3>
+        <p class="campaign-description">
+          Detects repeated failed SSH authentication attempts from a single source.
+        </p>
+        <div class="campaign-rule">
+          <span>TRIGGER</span>
+          <b>5 failed attempts / 60 seconds</b>
+        </div>
+        <div class="campaign-meta">
+          <span>Credential Access</span>
+          <strong>T1110 · Brute Force</strong>
+        </div>
+      </article>
+
+      <article class="campaign-card" data-campaign="portscan">
+        <div class="campaign-card-top">
+          <span class="campaign-icon">⌁</span>
+          <span id="campaignStatusScan" class="campaign-status monitoring">MONITORING</span>
+        </div>
+        <h3>Network Service Scanning</h3>
+        <p class="campaign-description">
+          Detects TCP reconnaissance against multiple destination ports on the monitored host.
+        </p>
+        <div class="campaign-rule">
+          <span>TRIGGER</span>
+          <b>8+ TCP ports / 60 seconds</b>
+        </div>
+        <div class="campaign-meta">
+          <span>Discovery</span>
+          <strong>T1046 · Network Service Scanning</strong>
+        </div>
+      </article>
+
+      <article class="campaign-card" data-campaign="privilege">
+        <div class="campaign-card-top">
+          <span class="campaign-icon">⬆</span>
+          <span id="campaignStatusPriv" class="campaign-status monitoring">MONITORING</span>
+        </div>
+        <h3>Privilege Escalation</h3>
+        <p class="campaign-description">
+          Detects observed privilege changes associated with elevated access activity.
+        </p>
+        <div class="campaign-rule">
+          <span>TRIGGER</span>
+          <b>Privilege change observed</b>
+        </div>
+        <div class="campaign-meta">
+          <span>Privilege Escalation</span>
+          <strong>T1548 · Abuse Elevation Control Mechanism</strong>
+        </div>
+      </article>
+
+    </div>
+
+    <div class="campaign-footer">
+      <span>●</span>
+      <span>Linux auth logs + Scapy packet sensing</span>
+      <span class="campaign-divider">|</span>
+      <span>Detection engine: ACTIVE</span>
+    </div>
+  </div>
+</section>
+<section id="assets" class="tab hidden"><div class="panel"><h2>Monitored Assets</h2><div id="assetTable"></div></div></section>
+<section id="intel" class="tab hidden">
+<div class="panel">
+  <div class="panel-head">
+    <div>
+      <h2>Threat Intelligence</h2>
+      <span class="muted">Local IOC repository and telemetry correlation</span>
+    </div>
+    <span class="live-pill">IOC ENGINE ACTIVE</span>
+  </div>
+
+  <div class="intel-controls">
+    <input id="intelSearch" placeholder="Search IPs, domains, hashes..." oninput="loadIntel()">
+    <select id="intelType" onchange="loadIntel()">
+      <option value="">All types</option>
+      <option value="ip">IP</option>
+      <option value="domain">Domain</option>
+      <option value="hash">Hash</option>
+      <option value="url">URL</option>
+    </select>
+    <select id="intelSeverity" onchange="loadIntel()">
+      <option value="">All severity</option>
+      <option value="critical">Critical</option>
+      <option value="high">High</option>
+      <option value="medium">Medium</option>
+      <option value="low">Low</option>
+    </select>
+  </div>
+</div>
+
+<div class="two-col intel-grid">
+  <div class="panel">
+    <div class="panel-head">
+      <h2>IOC Repository</h2>
+      <span id="iocCount" class="muted">0 indicators</span>
+    </div>
+
+    <div class="intel-add">
+      <select id="iocKind">
+        <option value="ip">IP</option>
+        <option value="domain">Domain</option>
+        <option value="hash">Hash</option>
+        <option value="url">URL</option>
+      </select>
+
+      <input id="iocValue" placeholder="Indicator value">
+
+      <select id="iocSeverity">
+        <option value="high">High</option>
+        <option value="critical">Critical</option>
+        <option value="medium">Medium</option>
+        <option value="low">Low</option>
+      </select>
+
+      <input id="iocDescription" placeholder="Description">
+
+      <button onclick="addIOC()">+ Add IOC</button>
+    </div>
+
+    <div id="iocTable"></div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head">
+      <h2>Telemetry Correlation</h2>
+      <span class="muted">Real observed sources</span>
+    </div>
+
+    <div id="intelTable"></div>
+  </div>
+</div>
+</section>
+<section id="blocked" class="tab hidden"><div class="panel"><div class="panel-head"><h2>IP Management</h2><span class="muted">Persistent application ban list</span></div><div class="ip-add"><input id="blockIP" placeholder="IP address"><button onclick="blockIP()">Block IP</button></div><div id="blockedTable"></div></div></section>
+<section id="reports" class="tab hidden">
+
+<div class="panel">
+  <div class="panel-head">
+    <div>
+      <h2>SOC Reports & Evidence</h2>
+      <span class="muted">Operational reporting from real SentinelSOC telemetry</span>
+    </div>
+    <button onclick="loadReports()">↻ Refresh Report</button>
+  </div>
+</div>
+
+<div class="cards report-cards">
+  <div>
+    <label>Security Events <i></i></label>
+    <b id="reportEvents">0</b>
+    <small>Detected security telemetry</small>
+  </div>
+
+  <div>
+    <label>Total Alerts <i></i></label>
+    <b id="reportAlerts">0</b>
+    <small>Detection engine output</small>
+  </div>
+
+  <div>
+    <label>Active Alerts <i></i></label>
+    <b id="reportActive">0</b>
+    <small>Requires analyst action</small>
+  </div>
+
+  <div>
+    <label>Resolved Alerts <i></i></label>
+    <b id="reportResolved">0</b>
+    <small>Closed detection cases</small>
+  </div>
+
+  <div>
+    <label>Priority Alerts <i></i></label>
+    <b id="reportPriority">0</b>
+    <small>Critical / High</small>
+  </div>
+
+  <div>
+    <label>Threat Intel <i></i></label>
+    <b id="reportIntel">0</b>
+    <small>Known indicators</small>
+  </div>
+</div>
+
+<div class="two-col">
+
+  <div class="panel">
+    <div class="panel-head">
+      <h2>Event Distribution</h2>
+      <span class="muted">Security telemetry only</span>
+    </div>
+    <div id="reportEventTypes"></div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head">
+      <h2>Alert Severity</h2>
+      <span class="muted">Detection priority</span>
+    </div>
+    <div id="reportSeverity"></div>
+  </div>
+
+</div>
+
+<div class="two-col">
+
+  <div class="panel">
+    <div class="panel-head">
+      <h2>Top Attack Techniques</h2>
+    </div>
+    <div id="reportTechniques"></div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head">
+      <h2>Top Source IPs</h2>
+    </div>
+    <div id="reportSources"></div>
+  </div>
+
+</div>
+
+<div class="panel">
+  <div class="panel-head">
+    <h2>Recent Security Alerts</h2>
+    <span class="muted">Latest detection evidence</span>
+  </div>
+  <div id="reportRecentAlerts"></div>
+</div>
+
+<div class="panel">
+  <div class="panel-head">
+    <h2>Evidence & Exports</h2>
+    <span class="muted">Downloadable SOC evidence</span>
+  </div>
+
+  <div class="report-export-grid">
+    <a class="report-export" href="/api/v2/report/events.csv">
+      <b>Events CSV</b>
+      <small>Security telemetry export</small>
+    </a>
+
+    <a class="report-export" href="/api/v2/report/alerts.csv">
+      <b>Alerts CSV</b>
+      <small>Detection and triage export</small>
+    </a>
+
+    <a class="report-export" href="/api/v2/report/incidents.csv">
+      <b>Incidents CSV</b>
+      <small>Incident response evidence</small>
+    </a>
+
+    <a class="report-export" href="/api/v2/report/audit.csv">
+      <b>Audit Log CSV</b>
+      <small>Analyst activity evidence</small>
+    </a>
+  </div>
+</div>
+
+</section>
+<section id="settings" class="tab hidden">
+
+<div class="panel">
+  <div class="panel-head">
+    <div>
+      <h2>SentinelSOC Settings</h2>
+      <span class="muted">Platform configuration and monitoring status</span>
+    </div>
+    <span class="live-pill">SYSTEM ACTIVE</span>
+  </div>
+</div>
+
+<div class="two-col">
+
+  <div class="panel">
+    <div class="panel-head">
+      <h2>System Status</h2>
+      <span class="muted">Live platform health</span>
+    </div>
+
+    <div class="settings-list">
+      <div class="row">
+        <b>Platform</b>
+        <span class="status-good">● SentinelSOC</span>
+      </div>
+
+      <div class="row">
+        <b>Backend</b>
+        <span id="settingBackend" class="status-good">● Online</span>
+      </div>
+
+      <div class="row">
+        <b>Database</b>
+        <span id="settingDatabase" class="status-good">● Connected</span>
+      </div>
+
+      <div class="row">
+        <b>Collection Mode</b>
+        <span class="badge">Agentless</span>
+      </div>
+
+      <div class="row">
+        <b>Detection Engine</b>
+        <span class="status-good">● Active</span>
+      </div>
+
+      <div class="row">
+        <b>Real-Time WebSocket</b>
+        <span class="status-good">● Enabled</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head">
+      <h2>Detection Configuration</h2>
+      <span class="muted">Current rule parameters</span>
+    </div>
+
+    <div class="settings-list">
+
+      <div class="row">
+        <b>SSH Brute Force Threshold</b>
+        <span class="setting-value">5 attempts</span>
+      </div>
+
+      <div class="row">
+        <b>Brute Force Window</b>
+        <span class="setting-value">60 seconds</span>
+      </div>
+
+      <div class="row">
+        <b>Brute Force Technique</b>
+        <span class="setting-value">T1110</span>
+      </div>
+
+      <div class="row">
+        <b>Port Scan Threshold</b>
+        <span id="settingPortThreshold" class="setting-value">Loading...</span>
+      </div>
+
+      <div class="row">
+        <b>Port Scan Technique</b>
+        <span class="setting-value">T1046</span>
+      </div>
+
+      <div class="row">
+        <b>Alert Cooldown</b>
+        <span id="settingCooldown" class="setting-value">Loading...</span>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<div class="two-col">
+
+  <div class="panel">
+    <div class="panel-head">
+      <h2>Telemetry Collection</h2>
+      <span class="muted">Agentless local sensors</span>
+    </div>
+
+    <div class="settings-list">
+
+      <div class="row">
+        <b>Linux Authentication Logs</b>
+        <span class="status-good">● Active</span>
+      </div>
+
+      <div class="row">
+        <b>System Metrics</b>
+        <span class="status-good">● Active</span>
+      </div>
+
+      <div class="row">
+        <b>Process Inventory</b>
+        <span class="status-good">● Active</span>
+      </div>
+
+      <div class="row">
+        <b>Network Inventory</b>
+        <span class="status-good">● Active</span>
+      </div>
+
+      <div class="row">
+        <b>TCP Packet Sensor</b>
+        <span class="status-good">● Active</span>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head">
+      <h2>Architecture</h2>
+      <span class="muted">SentinelSOC design</span>
+    </div>
+
+    <div class="settings-list">
+
+      <div class="row">
+        <b>Architecture</b>
+        <span class="setting-value">Agentless</span>
+      </div>
+
+      <div class="row">
+        <b>Backend Framework</b>
+        <span class="setting-value">FastAPI</span>
+      </div>
+
+      <div class="row">
+        <b>Database</b>
+        <span class="setting-value">SQLite</span>
+      </div>
+
+      <div class="row">
+        <b>Frontend</b>
+        <span class="setting-value">HTML / CSS / JavaScript</span>
+      </div>
+
+      <div class="row">
+        <b>External SIEM</b>
+        <span class="setting-value">None</span>
+      </div>
+
+      <div class="row">
+        <b>Splunk / Wazuh Dependency</b>
+        <span class="status-good">● None</span>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<div class="panel">
+
+  <div class="panel-head">
+    <h2>Security Controls</h2>
+    <span class="muted">Operational safeguards</span>
+  </div>
+
+  <div class="settings-notice">
+    <div class="notice-icon">✓</div>
+    <div>
+      <b>Real Telemetry Only</b>
+      <p>
+        SentinelSOC does not generate fake attack events or simulated alerts.
+        Detection results originate from collected telemetry and configured
+        detection rules.
+      </p>
+    </div>
+  </div>
+
+  <div class="settings-notice">
+    <div class="notice-icon">✓</div>
+    <div>
+      <b>Authorized Security Testing</b>
+      <p>
+        Attack simulations and penetration tests should only be performed
+        against systems you own or are explicitly authorized to assess.
+      </p>
+    </div>
+  </div>
+
+</div>
+
+</section>
+
+<section id="command-guard" class="tab hidden">
+  <div class="panel command-guard-panel">
+
+    <div class="panel-head">
+      <div>
+        <h2>Command Guard</h2>
+        <span class="muted">Host-level suspicious command protection</span>
+      </div>
+
+      <button id="commandGuardToggle"
+              class="guard-toggle"
+              type="button"
+              onclick="toggleCommandGuard()">
+        LOADING
+      </button>
+    </div>
+
+    <div class="guard-banner">
+      <div class="guard-shield">◈</div>
+      <div>
+        <strong>Pre-execution command protection</strong>
+        <p>
+          SentinelSOC evaluates shell commands against a conservative
+          destructive-command policy. Suspicious commands are blocked
+          when protection is enabled and recorded for SOC review.
+        </p>
+      </div>
+    </div>
+
+    <div class="guard-grid">
+
+      <article class="guard-card">
+        <span class="guard-label">PROTECTION</span>
+        <strong id="guardProtectionState">Loading...</strong>
+        <small>Command blocking status</small>
+      </article>
+
+      <article class="guard-card">
+        <span class="guard-label">BLOCKED COMMANDS</span>
+        <strong id="guardBlockedCount">0</strong>
+        <small>Recorded by Command Guard</small>
+      </article>
+
+      <article class="guard-card">
+        <span class="guard-label">POLICY</span>
+        <strong>DESTRUCTIVE</strong>
+        <small>Conservative command matching</small>
+      </article>
+
+      <article class="guard-card">
+        <span class="guard-label">MITRE ATT&CK</span>
+        <strong>T1059</strong>
+        <small>Command and Scripting Interpreter</small>
+      </article>
+
+    </div>
+
+    <div class="guard-policy">
+      <div class="guard-policy-head">
+        <h3>Protected command categories</h3>
+        <span>REAL ENFORCEMENT</span>
+      </div>
+
+      <div class="guard-tags">
+        <span>sudo rm -rf</span>
+        <span>filesystem formatting</span>
+        <span>disk overwrite</span>
+        <span>wipefs</span>
+        <span>shutdown / reboot</span>
+        <span>fork bomb</span>
+        <span>dangerous chmod</span>
+        <span>dangerous chown</span>
+      </div>
+    </div>
+
+    <div class="guard-events">
+      <div class="guard-events-head">
+        <div>
+          <h3>Blocked Command Queue</h3>
+          <span class="muted">Commands blocked by host protection</span>
+        </div>
+        <button type="button" onclick="loadCommandGuard()">Refresh</button>
+      </div>
+
+      <div id="commandGuardEvents" class="guard-event-list">
+        <div class="muted">Loading command guard events...</div>
+      </div>
+    </div>
+
+    <div class="guard-events guard-allowlist">
+      <div class="guard-events-head">
+        <div>
+          <h3>Analyst Allowlist</h3>
+          <span class="muted">Commands explicitly approved by the SOC analyst</span>
+        </div>
+      </div>
+
+      <div id="commandGuardAllowlist" class="guard-event-list">
+        <div class="muted">Loading allowlist...</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+</main></section></div><div id="flash" class="flash hidden"><div><strong>⚠️ BRUTE FORCE DETECTED</strong><span id="flashText">Credential Access · T1110 Brute Force</span></div></div><script src="/static/app.js"></script>
+
+</body></html>
