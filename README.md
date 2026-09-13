@@ -1,4 +1,4 @@
-# SentinelSOC v2 — Agentless Final-Year Project
+# SentinelSOC — Agentless Security Operations Center
 
 SentinelSOC is a from-scratch, real-time SOC/SIEM-style educational platform. **This updated build is agentless:** the backend itself collects telemetry from the Kali host. There is no Splunk, Wazuh, Elastic, Graylog, or endpoint agent integration.
 
