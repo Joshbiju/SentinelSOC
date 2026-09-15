@@ -2849,17 +2849,23 @@ async function loadReports(){
 
 
 async function loadSettings(){
+
   try{
-    const response = await fetch("/api/v2/dashboard");
+
+    const response =
+      await fetch("/api/v2/dashboard");
 
     if(!response.ok){
       throw new Error("Backend unavailable");
     }
 
-    const d = await response.json();
+    await response.json();
 
     const backend = $("settingBackend");
     const database = $("settingDatabase");
+    const backendStat = $("settingBackendStat");
+    const databaseStat = $("settingDatabaseStat");
+    const health = $("settingHealth");
 
     if(backend){
       backend.textContent = "● Online";
@@ -2871,39 +2877,73 @@ async function loadSettings(){
       database.className = "status-good";
     }
 
-    /*
-     * The values below mirror the active SentinelSOC
-     * detection configuration.
-     *
-     * Brute force:
-     *   5 attempts / 60 seconds
-     *
-     * Port scan:
-     *   configured by backend collector
-     */
-
-    const threshold = $("settingPortThreshold");
-    if(threshold){
-      threshold.textContent = "8 unique ports";
+    if(backendStat){
+      backendStat.textContent = "ONLINE";
     }
 
-    const cooldown = $("settingCooldown");
-    if(cooldown){
-      cooldown.textContent = "Configured by detection engine";
+    if(databaseStat){
+      databaseStat.textContent = "CONNECTED";
     }
+
+    if(health){
+      health.textContent = "● HEALTHY";
+      health.className = "status-good";
+    }
+
+    setText(
+      "settingBruteThreshold",
+      "5 attempts"
+    );
+
+    setText(
+      "settingBruteWindow",
+      "60 seconds"
+    );
+
+    setText(
+      "settingPortThreshold",
+      "8 unique ports"
+    );
+
+    setText(
+      "settingPortWindow",
+      "60 seconds"
+    );
+
+    setText(
+      "settingCooldown",
+      "300 seconds"
+    );
 
   }catch(err){
 
-    console.error("Settings error:", err);
+    console.error(
+      "[SentinelSOC] settings:",
+      err
+    );
 
     const backend = $("settingBackend");
+    const backendStat = $("settingBackendStat");
+    const health = $("settingHealth");
 
     if(backend){
       backend.textContent = "● Offline";
       backend.className = "status-bad";
     }
+
+    if(backendStat){
+      backendStat.textContent = "OFFLINE";
+    }
+
+    if(health){
+      health.textContent = "● DEGRADED";
+      health.className = "status-bad";
+    }
+
   }
+
 }
+
 
 async function refresh(){
   await Promise.allSettled([

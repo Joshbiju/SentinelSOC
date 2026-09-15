@@ -2877,3 +2877,145 @@ nav {
 
 }
 
+
+/* =========================
+   SOC SYSTEM & CONFIGURATION
+   ========================= */
+
+.settings-hero{
+  margin-bottom:14px;
+}
+
+.settings-hero-actions{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.settings-overview{
+  display:grid;
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  gap:12px;
+  margin-bottom:14px;
+}
+
+.settings-stat{
+  border:1px solid rgba(255,255,255,.08);
+  background:rgba(255,255,255,.025);
+  border-radius:10px;
+  padding:16px;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+
+.settings-stat span{
+  color:var(--muted);
+  font-size:9px;
+  letter-spacing:.09em;
+}
+
+.settings-stat b{
+  font-size:20px;
+  line-height:1;
+}
+
+.settings-stat small{
+  color:var(--muted);
+  font-size:10px;
+}
+
+.settings-control-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+}
+
+.settings-control{
+  display:flex;
+  gap:12px;
+  padding:14px;
+  border:1px solid rgba(255,255,255,.06);
+  background:rgba(255,255,255,.02);
+  border-radius:9px;
+}
+
+.settings-control-icon{
+  width:28px;
+  height:28px;
+  flex:0 0 28px;
+  display:grid;
+  place-items:center;
+  border-radius:50%;
+  border:1px solid rgba(120,220,160,.35);
+  font-weight:700;
+}
+
+.settings-control b{
+  font-size:12px;
+}
+
+.settings-control p{
+  margin:5px 0 0;
+  color:var(--muted);
+  font-size:10px;
+  line-height:1.5;
+}
+
+.settings-config-note{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:10px;
+}
+
+.settings-config-note > div{
+  border:1px solid rgba(255,255,255,.06);
+  border-radius:8px;
+  padding:12px;
+}
+
+.settings-config-note span{
+  display:block;
+  color:var(--muted);
+  font-size:8px;
+  letter-spacing:.08em;
+  margin-bottom:6px;
+}
+
+.settings-config-note b{
+  font-size:11px;
+  word-break:break-word;
+}
+
+@media(max-width:1000px){
+
+  .settings-overview{
+    grid-template-columns:repeat(3,minmax(0,1fr));
+  }
+
+  .settings-config-note{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+
+}
+
+@media(max-width:650px){
+
+  .settings-overview{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+
+  .settings-control-grid{
+    grid-template-columns:1fr;
+  }
+
+  .settings-config-note{
+    grid-template-columns:1fr;
+  }
+
+  .settings-hero-actions{
+    flex-wrap:wrap;
+  }
+
+}
+

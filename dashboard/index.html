@@ -767,212 +767,351 @@
 </section>
 <section id="settings" class="tab hidden">
 
-<div class="panel">
-  <div class="panel-head">
-    <div>
-      <h2>SentinelSOC Settings</h2>
-      <span class="muted">Platform configuration and monitoring status</span>
-    </div>
-    <span class="live-pill">SYSTEM ACTIVE</span>
-  </div>
-</div>
+  <div class="panel settings-hero">
+    <div class="panel-head">
+      <div>
+        <h2>SOC System & Configuration</h2>
+        <span class="muted">
+          SentinelSOC platform health, detection parameters and telemetry configuration
+        </span>
+      </div>
 
-<div class="two-col">
+      <div class="settings-hero-actions">
+        <span class="live-pill">SYSTEM ACTIVE</span>
+        <button type="button" onclick="loadSettings()">↻ Refresh</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="settings-overview">
+
+    <div class="settings-stat">
+      <span>BACKEND</span>
+      <b id="settingBackendStat">ONLINE</b>
+      <small>FastAPI service</small>
+    </div>
+
+    <div class="settings-stat">
+      <span>DATABASE</span>
+      <b id="settingDatabaseStat">CONNECTED</b>
+      <small>SQLite storage</small>
+    </div>
+
+    <div class="settings-stat">
+      <span>COLLECTION</span>
+      <b>AGENTLESS</b>
+      <small>Local telemetry</small>
+    </div>
+
+    <div class="settings-stat">
+      <span>DETECTION</span>
+      <b>ACTIVE</b>
+      <small>Rule engine</small>
+    </div>
+
+    <div class="settings-stat">
+      <span>REAL-TIME</span>
+      <b>ENABLED</b>
+      <small>WebSocket updates</small>
+    </div>
+
+  </div>
+
+  <div class="two-col">
+
+    <div class="panel">
+
+      <div class="panel-head">
+        <div>
+          <h2>System Health</h2>
+          <span class="muted">Current SentinelSOC service state</span>
+        </div>
+        <span id="settingHealth" class="status-good">● HEALTHY</span>
+      </div>
+
+      <div class="settings-list">
+
+        <div class="row">
+          <b>Platform</b>
+          <span class="status-good">● SentinelSOC</span>
+        </div>
+
+        <div class="row">
+          <b>Backend API</b>
+          <span id="settingBackend" class="status-good">● Online</span>
+        </div>
+
+        <div class="row">
+          <b>Database</b>
+          <span id="settingDatabase" class="status-good">● Connected</span>
+        </div>
+
+        <div class="row">
+          <b>Collection Mode</b>
+          <span class="badge">Agentless</span>
+        </div>
+
+        <div class="row">
+          <b>Detection Engine</b>
+          <span class="status-good">● Active</span>
+        </div>
+
+        <div class="row">
+          <b>Real-Time WebSocket</b>
+          <span class="status-good">● Enabled</span>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="panel">
+
+      <div class="panel-head">
+        <div>
+          <h2>Detection Configuration</h2>
+          <span class="muted">Active environment parameters</span>
+        </div>
+        <span class="badge">ENVIRONMENT</span>
+      </div>
+
+      <div class="settings-list">
+
+        <div class="row">
+          <b>SSH Brute Force Threshold</b>
+          <span id="settingBruteThreshold" class="setting-value">
+            5 attempts
+          </span>
+        </div>
+
+        <div class="row">
+          <b>Brute Force Window</b>
+          <span id="settingBruteWindow" class="setting-value">
+            60 seconds
+          </span>
+        </div>
+
+        <div class="row">
+          <b>Brute Force Technique</b>
+          <span class="setting-value">T1110 · Brute Force</span>
+        </div>
+
+        <div class="row">
+          <b>Port Scan Threshold</b>
+          <span id="settingPortThreshold" class="setting-value">
+            8 unique ports
+          </span>
+        </div>
+
+        <div class="row">
+          <b>Port Scan Window</b>
+          <span id="settingPortWindow" class="setting-value">
+            60 seconds
+          </span>
+        </div>
+
+        <div class="row">
+          <b>Port Scan Technique</b>
+          <span class="setting-value">
+            T1046 · Network Service Scanning
+          </span>
+        </div>
+
+        <div class="row">
+          <b>Alert Cooldown</b>
+          <span id="settingCooldown" class="setting-value">
+            300 seconds
+          </span>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <div class="two-col">
+
+    <div class="panel">
+
+      <div class="panel-head">
+        <div>
+          <h2>Telemetry Collection</h2>
+          <span class="muted">Agentless local sensors</span>
+        </div>
+        <span class="live-pill">LIVE</span>
+      </div>
+
+      <div class="settings-list">
+
+        <div class="row">
+          <b>Linux Authentication Logs</b>
+          <span class="status-good">● Active</span>
+        </div>
+
+        <div class="row">
+          <b>System Metrics</b>
+          <span class="status-good">● Active</span>
+        </div>
+
+        <div class="row">
+          <b>Process Inventory</b>
+          <span class="status-good">● Active</span>
+        </div>
+
+        <div class="row">
+          <b>Network Inventory</b>
+          <span class="status-good">● Active</span>
+        </div>
+
+        <div class="row">
+          <b>TCP Packet Sensor</b>
+          <span class="status-good">● Active</span>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="panel">
+
+      <div class="panel-head">
+        <div>
+          <h2>Platform Architecture</h2>
+          <span class="muted">Deployment and technology stack</span>
+        </div>
+      </div>
+
+      <div class="settings-list">
+
+        <div class="row">
+          <b>Architecture</b>
+          <span class="setting-value">Agentless</span>
+        </div>
+
+        <div class="row">
+          <b>Backend Framework</b>
+          <span class="setting-value">FastAPI</span>
+        </div>
+
+        <div class="row">
+          <b>Database Engine</b>
+          <span class="setting-value">SQLite</span>
+        </div>
+
+        <div class="row">
+          <b>Frontend</b>
+          <span class="setting-value">HTML / CSS / JavaScript</span>
+        </div>
+
+        <div class="row">
+          <b>Packet Sensing</b>
+          <span class="setting-value">Scapy</span>
+        </div>
+
+        <div class="row">
+          <b>External SIEM</b>
+          <span class="setting-value">None</span>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
 
   <div class="panel">
+
     <div class="panel-head">
-      <h2>System Status</h2>
-      <span class="muted">Live platform health</span>
+      <div>
+        <h2>Security Controls</h2>
+        <span class="muted">
+          Operational safeguards enforced by SentinelSOC
+        </span>
+      </div>
+      <span class="badge">PROTECTED</span>
     </div>
 
-    <div class="settings-list">
-      <div class="row">
-        <b>Platform</b>
-        <span class="status-good">● SentinelSOC</span>
+    <div class="settings-control-grid">
+
+      <div class="settings-control">
+        <div class="settings-control-icon">✓</div>
+        <div>
+          <b>Real Telemetry Only</b>
+          <p>
+            Detection results originate from collected telemetry and configured
+            detection rules rather than synthetic alerts.
+          </p>
+        </div>
       </div>
 
-      <div class="row">
-        <b>Backend</b>
-        <span id="settingBackend" class="status-good">● Online</span>
+      <div class="settings-control">
+        <div class="settings-control-icon">✓</div>
+        <div>
+          <b>Detection Rule Enforcement</b>
+          <p>
+            Security alerts are generated through the active detection engine
+            and mapped to defined detection techniques.
+          </p>
+        </div>
       </div>
 
-      <div class="row">
-        <b>Database</b>
-        <span id="settingDatabase" class="status-good">● Connected</span>
+      <div class="settings-control">
+        <div class="settings-control-icon">✓</div>
+        <div>
+          <b>Audit Logging</b>
+          <p>
+            Analyst actions such as incident and IP-management operations are
+            recorded for operational evidence.
+          </p>
+        </div>
       </div>
 
-      <div class="row">
-        <b>Collection Mode</b>
-        <span class="badge">Agentless</span>
+      <div class="settings-control">
+        <div class="settings-control-icon">✓</div>
+        <div>
+          <b>Command Guard</b>
+          <p>
+            Destructive shell operations are controlled through the
+            SentinelSOC command authorization layer.
+          </p>
+        </div>
       </div>
 
-      <div class="row">
-        <b>Detection Engine</b>
-        <span class="status-good">● Active</span>
-      </div>
-
-      <div class="row">
-        <b>Real-Time WebSocket</b>
-        <span class="status-good">● Enabled</span>
-      </div>
     </div>
+
   </div>
 
   <div class="panel">
+
     <div class="panel-head">
-      <h2>Detection Configuration</h2>
-      <span class="muted">Current rule parameters</span>
+      <div>
+        <h2>Configuration Source</h2>
+        <span class="muted">Runtime configuration model</span>
+      </div>
     </div>
 
-    <div class="settings-list">
+    <div class="settings-config-note">
 
-      <div class="row">
-        <b>SSH Brute Force Threshold</b>
-        <span class="setting-value">5 attempts</span>
+      <div>
+        <span>CONFIGURATION</span>
+        <b>Environment Variables</b>
       </div>
 
-      <div class="row">
-        <b>Brute Force Window</b>
-        <span class="setting-value">60 seconds</span>
+      <div>
+        <span>RULE DEFINITIONS</span>
+        <b>rules/rules.json</b>
       </div>
 
-      <div class="row">
-        <b>Brute Force Technique</b>
-        <span class="setting-value">T1110</span>
+      <div>
+        <span>DATABASE</span>
+        <b>data/soc.db</b>
       </div>
 
-      <div class="row">
-        <b>Port Scan Threshold</b>
-        <span id="settingPortThreshold" class="setting-value">Loading...</span>
-      </div>
-
-      <div class="row">
-        <b>Port Scan Technique</b>
-        <span class="setting-value">T1046</span>
-      </div>
-
-      <div class="row">
-        <b>Alert Cooldown</b>
-        <span id="settingCooldown" class="setting-value">Loading...</span>
+      <div>
+        <span>COLLECTION</span>
+        <b>LocalCollector</b>
       </div>
 
     </div>
+
   </div>
-
-</div>
-
-<div class="two-col">
-
-  <div class="panel">
-    <div class="panel-head">
-      <h2>Telemetry Collection</h2>
-      <span class="muted">Agentless local sensors</span>
-    </div>
-
-    <div class="settings-list">
-
-      <div class="row">
-        <b>Linux Authentication Logs</b>
-        <span class="status-good">● Active</span>
-      </div>
-
-      <div class="row">
-        <b>System Metrics</b>
-        <span class="status-good">● Active</span>
-      </div>
-
-      <div class="row">
-        <b>Process Inventory</b>
-        <span class="status-good">● Active</span>
-      </div>
-
-      <div class="row">
-        <b>Network Inventory</b>
-        <span class="status-good">● Active</span>
-      </div>
-
-      <div class="row">
-        <b>TCP Packet Sensor</b>
-        <span class="status-good">● Active</span>
-      </div>
-
-    </div>
-  </div>
-
-  <div class="panel">
-    <div class="panel-head">
-      <h2>Architecture</h2>
-      <span class="muted">SentinelSOC design</span>
-    </div>
-
-    <div class="settings-list">
-
-      <div class="row">
-        <b>Architecture</b>
-        <span class="setting-value">Agentless</span>
-      </div>
-
-      <div class="row">
-        <b>Backend Framework</b>
-        <span class="setting-value">FastAPI</span>
-      </div>
-
-      <div class="row">
-        <b>Database</b>
-        <span class="setting-value">SQLite</span>
-      </div>
-
-      <div class="row">
-        <b>Frontend</b>
-        <span class="setting-value">HTML / CSS / JavaScript</span>
-      </div>
-
-      <div class="row">
-        <b>External SIEM</b>
-        <span class="setting-value">None</span>
-      </div>
-
-      <div class="row">
-        <b>Splunk / Wazuh Dependency</b>
-        <span class="status-good">● None</span>
-      </div>
-
-    </div>
-  </div>
-
-</div>
-
-<div class="panel">
-
-  <div class="panel-head">
-    <h2>Security Controls</h2>
-    <span class="muted">Operational safeguards</span>
-  </div>
-
-  <div class="settings-notice">
-    <div class="notice-icon">✓</div>
-    <div>
-      <b>Real Telemetry Only</b>
-      <p>
-        SentinelSOC does not generate fake attack events or simulated alerts.
-        Detection results originate from collected telemetry and configured
-        detection rules.
-      </p>
-    </div>
-  </div>
-
-  <div class="settings-notice">
-    <div class="notice-icon">✓</div>
-    <div>
-      <b>Authorized Security Testing</b>
-      <p>
-        Attack simulations and penetration tests should only be performed
-        against systems you own or are explicitly authorized to assess.
-      </p>
-    </div>
-  </div>
-
-</div>
 
 </section>
 
