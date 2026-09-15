@@ -116,75 +116,104 @@
   </div>
 </section>
 <section id="intel" class="tab hidden">
-<div class="panel">
-  <div class="panel-head">
-    <div>
-      <h2>Threat Intelligence</h2>
-      <span class="muted">Local IOC repository and telemetry correlation</span>
-    </div>
-    <span class="live-pill">IOC ENGINE ACTIVE</span>
-  </div>
-
-  <div class="intel-controls">
-    <input id="intelSearch" placeholder="Search IPs, domains, hashes..." oninput="loadIntel()">
-    <select id="intelType" onchange="loadIntel()">
-      <option value="">All types</option>
-      <option value="ip">IP</option>
-      <option value="domain">Domain</option>
-      <option value="hash">Hash</option>
-      <option value="url">URL</option>
-    </select>
-    <select id="intelSeverity" onchange="loadIntel()">
-      <option value="">All severity</option>
-      <option value="critical">Critical</option>
-      <option value="high">High</option>
-      <option value="medium">Medium</option>
-      <option value="low">Low</option>
-    </select>
-  </div>
-</div>
-
-<div class="two-col intel-grid">
   <div class="panel">
     <div class="panel-head">
-      <h2>IOC Repository</h2>
-      <span id="iocCount" class="muted">0 indicators</span>
+      <div>
+        <h2>Threat Intelligence</h2>
+        <span class="muted">Local IOC repository and telemetry correlation</span>
+      </div>
+      <span class="live-pill">IOC ENGINE ACTIVE</span>
     </div>
 
-    <div class="intel-add">
-      <select id="iocKind">
+    <div class="intel-overview">
+      <div class="intel-stat">
+        <span>TOTAL IOCs</span>
+        <b id="intelTotal">0</b>
+      </div>
+      <div class="intel-stat">
+        <span>CRITICAL</span>
+        <b id="intelCritical">0</b>
+      </div>
+      <div class="intel-stat">
+        <span>HIGH</span>
+        <b id="intelHigh">0</b>
+      </div>
+      <div class="intel-stat">
+        <span>CORRELATED SOURCES</span>
+        <b id="intelSources">0</b>
+      </div>
+    </div>
+
+    <div class="intel-controls">
+      <input id="intelSearch" placeholder="Search IPs, domains, hashes..." oninput="loadIntel()">
+
+      <select id="intelType" onchange="loadIntel()">
+        <option value="">All types</option>
         <option value="ip">IP</option>
         <option value="domain">Domain</option>
         <option value="hash">Hash</option>
         <option value="url">URL</option>
       </select>
 
-      <input id="iocValue" placeholder="Indicator value">
-
-      <select id="iocSeverity">
-        <option value="high">High</option>
+      <select id="intelSeverity" onchange="loadIntel()">
+        <option value="">All severity</option>
         <option value="critical">Critical</option>
+        <option value="high">High</option>
         <option value="medium">Medium</option>
         <option value="low">Low</option>
       </select>
-
-      <input id="iocDescription" placeholder="Description">
-
-      <button onclick="addIOC()">+ Add IOC</button>
     </div>
-
-    <div id="iocTable"></div>
   </div>
 
-  <div class="panel">
-    <div class="panel-head">
-      <h2>Telemetry Correlation</h2>
-      <span class="muted">Real observed sources</span>
+  <div class="two-col intel-grid">
+
+    <div class="panel">
+      <div class="panel-head">
+        <div>
+          <h2>IOC Repository</h2>
+          <span class="muted">Local indicators of compromise</span>
+        </div>
+        <span id="iocCount" class="muted">0 indicators</span>
+      </div>
+
+      <div class="intel-add">
+        <select id="iocKind">
+          <option value="ip">IP</option>
+          <option value="domain">Domain</option>
+          <option value="hash">Hash</option>
+          <option value="url">URL</option>
+        </select>
+
+        <input id="iocValue" placeholder="Indicator value">
+
+        <select id="iocSeverity">
+          <option value="high">High</option>
+          <option value="critical">Critical</option>
+          <option value="medium">Medium</option>
+          <option value="low">Low</option>
+        </select>
+
+        <input id="iocDescription" placeholder="Description">
+
+        <button onclick="addIOC()">+ Add IOC</button>
+      </div>
+
+      <div id="iocTable"></div>
     </div>
 
-    <div id="intelTable"></div>
+    <div class="panel">
+      <div class="panel-head">
+        <div>
+          <h2>Telemetry Correlation</h2>
+          <span class="muted">Observed source activity</span>
+        </div>
+        <span class="live-pill">LIVE TELEMETRY</span>
+      </div>
+
+      <div id="intelTable"></div>
+    </div>
+
   </div>
-</div>
 </section>
 <section id="blocked" class="tab hidden"><div class="panel"><div class="panel-head"><h2>IP Management</h2><span class="muted">Persistent application ban list</span></div><div class="ip-add"><input id="blockIP" placeholder="IP address"><button onclick="blockIP()">Block IP</button></div><div id="blockedTable"></div></div></section>
 <section id="reports" class="tab hidden">

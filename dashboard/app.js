@@ -1258,7 +1258,8 @@ async function loadIntel(){
     const type = $("intelType")?.value || "";
     const severity = $("intelSeverity")?.value || "";
 
-    const filtered = (iocs || []).filter(x=>{
+    const allIOCs = iocs || [];
+    const filtered = allIOCs.filter(x=>{
       const hay = [
         x.kind,
         x.value,
@@ -1271,55 +1272,128 @@ async function loadIntel(){
         && (!severity || x.severity === severity);
     });
 
-    const count = $("iocCount");
-    if(count) count.textContent = filtered.length + " indicators";
+    const critical = allIOCs.filter(
+      x => String(x.severity || "").toLowerCase() === "critical"
+    ).length;
+
+    const high = allIOCs.filter(
+      x => String(x.severity || "").toLowerCase() === "high"
+    ).length;
+
+    if($("intelTotal"))
+      $("intelTotal").textContent = allIOCs.length.toLocaleString();
+
+    if($("intelCritical"))
+      $("intelCritical").textContent = critical.toLocaleString();
+
+    if($("intelHigh"))
+      $("intelHigh").textContent = high.toLocaleString();
+
+    if($("intelSources"))
+      $("intelSources").textContent =
+        (correlation || []).length.toLocaleString();
+
+    if($("iocCount"))
+      $("iocCount").textContent =
+        filtered.length.toLocaleString() + " indicators";
 
     const table = $("iocTable");
 
     if(table){
-      table.innerHTML = filtered.map(x=>`
-        <div class="row intel-ioc-row">
-          <div>
-            <b class="${esc(x.severity || "medium")}">
-              ${esc((x.kind || "IOC").toUpperCase())}
-            </b>
-            <strong class="ioc-value">${esc(x.value)}</strong>
-            <small>${esc(x.description || "No description")}</small>
-          </div>
-          <div class="ioc-meta">
-            <span>${esc(x.severity || "medium")}</span>
-            <button onclick="event.stopPropagation();removeIOC(${x.id})">
+      table.innerHTML = filtered.map(x=>{
+        const sev = String(x.severity || "medium").toLowerCase();
+        const kind = String(x.kind || "ioc").toLowerCase();
+
+        return `
+          <div class="intel-ioc-card">
+
+            <div class="intel-ioc-main">
+              <div class="intel-ioc-top">
+                <span class="intel-kind kind-${esc(kind)}">
+                  ${esc(kind.toUpperCase())}
+                </span>
+
+                <span class="intel-severity severity-${esc(sev)}">
+                  ${esc(sev)}
+                </span>
+              </div>
+
+              <strong class="ioc-value">
+                ${esc(x.value)}
+              </strong>
+
+              <small>
+                ${esc(x.description || "No description provided")}
+              </small>
+            </div>
+
+            <button
+              class="intel-remove"
+              onclick="event.stopPropagation();removeIOC(${x.id})">
               Remove
             </button>
+
           </div>
-        </div>
-      `).join("") || '<div class="empty">No matching indicators</div>';
+        `;
+      }).join("") ||
+      '<div class="empty">No matching indicators</div>';
     }
 
     const container = $("intelTable");
 
     if(container){
-      container.innerHTML = (correlation || []).map(x=>`
-        <div class="row intel-correlation">
-          <div>
-            <b>${esc(x.source_ip)}</b>
-            <small>
-              ${x.events} observed events
-              · ${x.destination_ports?.length || 0} destination ports
-            </small>
-          </div>
+      container.innerHTML = (correlation || []).map(x=>{
+        const ports = x.destination_ports || [];
+        const threats = x.threat_types || [];
 
-          <div>
-            <span class="badge">
-              ${esc((x.threat_types || []).join(", ") || "Observed")}
-            </span>
+        return `
+          <div class="intel-correlation-card">
+
+            <div class="correlation-head">
+              <div>
+                <span class="correlation-label">SOURCE IP</span>
+                <strong>${esc(x.source_ip || "Unknown")}</strong>
+              </div>
+
+              <span class="correlation-events">
+                ${Number(x.events || 0).toLocaleString()} EVENTS
+              </span>
+            </div>
+
+            <div class="correlation-meta">
+
+              <div>
+                <span>DESTINATION PORTS</span>
+                <b>
+                  ${ports.length
+                    ? ports.map(p=>esc(String(p))).join(", ")
+                    : "None observed"}
+                </b>
+              </div>
+
+              <div>
+                <span>THREAT TYPES</span>
+                <b>
+                  ${threats.length
+                    ? threats.map(t=>`
+                        <span class="threat-tag">
+                          ${esc(t)}
+                        </span>
+                      `).join("")
+                    : '<span class="threat-tag">Observed</span>'}
+                </b>
+              </div>
+
+            </div>
+
           </div>
-        </div>
-      `).join("") || '<div class="empty">No source IP correlation data</div>';
+        `;
+      }).join("") ||
+      '<div class="empty">No source IP correlation data</div>';
     }
 
   }catch(err){
-    console.error("Threat Intel error:",err);
+    console.error("[SentinelSOC] Threat Intel:",err);
   }
 }
 
