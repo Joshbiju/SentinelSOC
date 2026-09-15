@@ -413,7 +413,7 @@ def dashboard():
     intel = scalar(
         """
         SELECT COUNT(*)
-        FROM threat_intel
+        FROM iocs
         """
     ) or 0
 
@@ -438,12 +438,23 @@ def dashboard():
         for row in top_vectors_rows
     ]
 
-    score = max(
-        0,
-        min(
-            100,
-            100 - (critical * 15) - (high * 7)
-        ),
+    # Security posture score:
+    # Use a diminishing penalty so repeated active alerts lower the score
+    # without immediately collapsing it to 0.
+    risk_pressure = (
+        (critical * 12)
+        + (high * 5)
+        + (active_alerts * 0.5)
+    )
+
+    score = round(
+        max(
+            0,
+            min(
+                100,
+                100 * (100 / (100 + risk_pressure))
+            )
+        )
     )
 
     return {
