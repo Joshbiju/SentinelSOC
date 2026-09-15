@@ -1249,6 +1249,135 @@ async function loadAssets(){
    ========================= */
 
 
+async function loadRules(){
+  try{
+    const res = await fetch("/api/v2/rules");
+    const rules = await res.json();
+
+    const total = rules.length;
+    const enabled = rules.filter(r => r.enabled).length;
+    const high = rules.filter(r =>
+      ["high","critical"].includes(String(r.severity || "").toLowerCase())
+    ).length;
+
+    const techniques = new Set(
+      rules
+        .map(r => r.technique)
+        .filter(Boolean)
+    ).size;
+
+    const totalEl = document.getElementById("rulesTotal");
+    const enabledEl = document.getElementById("rulesEnabled");
+    const highEl = document.getElementById("rulesHigh");
+    const techniquesEl = document.getElementById("rulesTechniques");
+    const countEl = document.getElementById("rulesCount");
+    const table = document.getElementById("rulesTable");
+
+    if(totalEl) totalEl.textContent = total;
+    if(enabledEl) enabledEl.textContent = enabled;
+    if(highEl) highEl.textContent = high;
+    if(techniquesEl) techniquesEl.textContent = techniques;
+    if(countEl) countEl.textContent = `${total} rules`;
+
+    if(!table) return;
+
+    if(!rules.length){
+      table.innerHTML = `
+        <div class="empty">
+          No detection rules configured
+        </div>
+      `;
+      return;
+    }
+
+    table.innerHTML = rules.map(rule => {
+      const severity = String(rule.severity || "unknown").toLowerCase();
+
+      const conditionEntries = Object.entries(rule.conditions || {});
+
+      const conditions = conditionEntries.length
+        ? conditionEntries.map(([key, value]) => `
+            <div class="rule-condition">
+              <span>${esc(key)}</span>
+              <b>${esc(Array.isArray(value) ? value.join(", ") : String(value))}</b>
+            </div>
+          `).join("")
+        : `
+            <div class="rule-condition">
+              <span>Condition</span>
+              <b>Event based</b>
+            </div>
+          `;
+
+      return `
+        <article class="rule-card">
+
+          <div class="rule-card-head">
+            <div>
+              <div class="rule-id">${esc(rule.id)}</div>
+              <h3>${esc(rule.title)}</h3>
+            </div>
+
+            <div class="rule-status-row">
+              <span class="rule-severity ${severity}">
+                ${esc(String(rule.severity || "UNKNOWN").toUpperCase())}
+              </span>
+
+              <span class="rule-enabled ${rule.enabled ? "enabled" : "disabled"}">
+                ● ${rule.enabled ? "ENABLED" : "DISABLED"}
+              </span>
+            </div>
+          </div>
+
+          <p class="rule-description">
+            ${esc(rule.description || "No description available.")}
+          </p>
+
+          <div class="rule-meta">
+            <div>
+              <span>RISK</span>
+              <b>${Number(rule.risk || 0)}</b>
+            </div>
+
+            <div>
+              <span>MITRE TACTIC</span>
+              <b>${esc(rule.tactic || "—")}</b>
+            </div>
+
+            <div>
+              <span>MITRE TECHNIQUE</span>
+              <b>${esc(rule.technique || "—")}</b>
+            </div>
+          </div>
+
+          <div class="rule-conditions">
+            <div class="rule-section-title">
+              MATCH CONDITIONS
+            </div>
+
+            ${conditions}
+          </div>
+
+        </article>
+      `;
+    }).join("");
+
+  }catch(err){
+    console.error("Failed to load detection rules:", err);
+
+    const table = document.getElementById("rulesTable");
+
+    if(table){
+      table.innerHTML = `
+        <div class="empty">
+          Unable to load detection rules
+        </div>
+      `;
+    }
+  }
+}
+
+
 async function loadIntel(){
   try{
     const iocs = await get("/api/v2/iocs");
@@ -2006,6 +2135,7 @@ async function refresh(){
     loadAlerts(),
     loadIncidents(),
     loadAssets(),
+    loadRules(),
     loadIntel(),
     loadBlocked(),
     loadSettings(),

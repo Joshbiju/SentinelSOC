@@ -1248,6 +1248,49 @@ def threat_correlation():
 # IP management
 # ============================================================
 
+@app.get("/api/v2/rules")
+def get_rules():
+    rows = execute("""
+        SELECT
+            id,
+            title,
+            description,
+            severity,
+            risk,
+            enabled,
+            tactic,
+            technique,
+            conditions
+        FROM rules
+        ORDER BY
+            CASE severity
+                WHEN 'critical' THEN 1
+                WHEN 'high' THEN 2
+                WHEN 'medium' THEN 3
+                WHEN 'low' THEN 4
+                ELSE 5
+            END,
+            id
+    """, fetch=True)
+
+    result = []
+
+    for row in rows:
+        result.append({
+            "id": row[0],
+            "title": row[1],
+            "description": row[2],
+            "severity": row[3],
+            "risk": row[4],
+            "enabled": bool(row[5]),
+            "tactic": row[6],
+            "technique": row[7],
+            "conditions": json.loads(row[8]) if row[8] else {}
+        })
+
+    return result
+
+
 @app.get("/api/v2/ip-management")
 def ip_management():
 

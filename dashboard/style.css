@@ -1601,3 +1601,253 @@ nav {
     flex-direction:column;
   }
 }
+
+/* =========================
+   Detection Rules
+   ========================= */
+
+.rules-overview{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:14px;
+  margin-top:18px;
+}
+
+.rules-stat{
+  background:rgba(255,255,255,.025);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:12px;
+  padding:18px;
+  min-height:82px;
+}
+
+.rules-stat span{
+  display:block;
+  color:var(--muted,#8d96a8);
+  font-size:11px;
+  letter-spacing:.08em;
+  font-weight:700;
+  margin-bottom:9px;
+}
+
+.rules-stat b{
+  display:block;
+  font-size:27px;
+  line-height:1;
+}
+
+.rules-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:16px;
+}
+
+.rule-card{
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:14px;
+  padding:18px;
+  background:rgba(255,255,255,.018);
+  transition:border-color .2s ease,transform .2s ease;
+}
+
+.rule-card:hover{
+  border-color:rgba(255,255,255,.16);
+  transform:translateY(-1px);
+}
+
+.rule-card-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:16px;
+  margin-bottom:12px;
+}
+
+.rule-id{
+  font-size:11px;
+  font-weight:800;
+  letter-spacing:.08em;
+  color:#7f8da8;
+  margin-bottom:5px;
+}
+
+.rule-card h3{
+  margin:0;
+  font-size:17px;
+}
+
+.rule-status-row{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  flex-wrap:wrap;
+  justify-content:flex-end;
+}
+
+.rule-severity,
+.rule-enabled{
+  display:inline-flex;
+  align-items:center;
+  border-radius:999px;
+  padding:5px 9px;
+  font-size:10px;
+  font-weight:800;
+  letter-spacing:.04em;
+  white-space:nowrap;
+}
+
+.rule-severity.critical,
+.rule-severity.high{
+  background:rgba(255,70,70,.12);
+  border:1px solid rgba(255,70,70,.25);
+  color:#ff7777;
+}
+
+.rule-severity.medium{
+  background:rgba(255,180,60,.12);
+  border:1px solid rgba(255,180,60,.25);
+  color:#ffc15c;
+}
+
+.rule-severity.low{
+  background:rgba(70,210,130,.1);
+  border:1px solid rgba(70,210,130,.22);
+  color:#68dc98;
+}
+
+.rule-severity.unknown{
+  background:rgba(150,160,180,.1);
+  border:1px solid rgba(150,160,180,.2);
+  color:#aab3c2;
+}
+
+.rule-enabled.enabled{
+  color:#65d995;
+  background:rgba(60,210,125,.08);
+  border:1px solid rgba(60,210,125,.18);
+}
+
+.rule-enabled.disabled{
+  color:#9da4b2;
+  background:rgba(150,160,180,.08);
+  border:1px solid rgba(150,160,180,.16);
+}
+
+.rule-description{
+  color:#aeb6c5;
+  font-size:13px;
+  line-height:1.6;
+  margin:0 0 16px;
+}
+
+.rule-meta{
+  display:grid;
+  grid-template-columns:.65fr 1fr 1.25fr;
+  gap:10px;
+  margin-bottom:16px;
+}
+
+.rule-meta > div{
+  background:rgba(255,255,255,.025);
+  border:1px solid rgba(255,255,255,.06);
+  border-radius:9px;
+  padding:10px;
+  min-width:0;
+}
+
+.rule-meta span{
+  display:block;
+  color:#737d91;
+  font-size:9px;
+  font-weight:800;
+  letter-spacing:.06em;
+  margin-bottom:5px;
+}
+
+.rule-meta b{
+  display:block;
+  color:#d9deea;
+  font-size:11px;
+  line-height:1.4;
+  overflow-wrap:anywhere;
+}
+
+.rule-conditions{
+  border-top:1px solid rgba(255,255,255,.07);
+  padding-top:13px;
+}
+
+.rule-section-title{
+  color:#737d91;
+  font-size:9px;
+  font-weight:800;
+  letter-spacing:.08em;
+  margin-bottom:8px;
+}
+
+.rule-condition{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:14px;
+  padding:8px 0;
+  border-bottom:1px solid rgba(255,255,255,.045);
+}
+
+.rule-condition:last-child{
+  border-bottom:0;
+}
+
+.rule-condition span{
+  color:#7f899c;
+  font-size:11px;
+  font-family:monospace;
+}
+
+.rule-condition b{
+  color:#cbd2df;
+  font-size:11px;
+  text-align:right;
+  line-height:1.45;
+  max-width:75%;
+  overflow-wrap:anywhere;
+}
+
+@media(max-width:1000px){
+  .rules-overview{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+
+  .rules-grid{
+    grid-template-columns:1fr;
+  }
+}
+
+@media(max-width:600px){
+  .rules-overview{
+    grid-template-columns:1fr;
+  }
+
+  .rule-card-head{
+    flex-direction:column;
+  }
+
+  .rule-status-row{
+    justify-content:flex-start;
+  }
+
+  .rule-meta{
+    grid-template-columns:1fr;
+  }
+
+  .rule-condition{
+    flex-direction:column;
+    gap:4px;
+  }
+
+  .rule-condition b{
+    max-width:100%;
+    text-align:left;
+  }
+}
+

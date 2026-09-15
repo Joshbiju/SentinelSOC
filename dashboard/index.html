@@ -1,6 +1,6 @@
 <!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SentinelSOC Command Center</title><link rel="stylesheet" href="/static/style.css"><script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script></head><body>
 <div class="app-shell"><aside class="sidebar"><div class="brand">SentinelSOC</div><div class="brand-sub">Security Operations<br>Center</div><nav>
-<button class="nav active" onclick="showTab('overview',this)">▦ <span>Dashboard</span></button><button class="nav" onclick="showTab('alerts',this)">♢ <span>Alerts</span></button><button class="nav" onclick="showTab('incidents',this)">♧ <span>Incidents</span></button><button class="nav" onclick="showTab('campaigns',this)">◉ <span>Attack Campaigns</span></button><button class="nav" onclick="showTab('assets',this)">▤ <span>Assets</span></button><button class="nav" onclick="showTab('intel',this)">◎ <span>Threat Intel</span></button><button class="nav" onclick="showTab('blocked',this)">⊘ <span>IP Management</span></button><button class="nav" onclick="showTab('reports',this)">▧ <span>Reports</span></button><button class="nav" onclick="showTab('settings',this)">⚙ <span>Settings</span></button>
+<button class="nav active" onclick="showTab('overview',this)">▦ <span>Dashboard</span></button><button class="nav" onclick="showTab('alerts',this)">♢ <span>Alerts</span></button><button class="nav" onclick="showTab('incidents',this)">♧ <span>Incidents</span></button><button class="nav" onclick="showTab('campaigns',this)">◉ <span>Attack Campaigns</span></button><button class="nav" onclick="showTab('assets',this)">▤ <span>Assets</span></button><button class="nav" onclick="showTab('intel',this)">◎ <span>Threat Intel</span></button><button class="nav" onclick="showTab('rules',this)">◈ <span>Detection Rules</span></button><button class="nav" onclick="showTab('blocked',this)">⊘ <span>IP Management</span></button><button class="nav" onclick="showTab('reports',this)">▧ <span>Reports</span></button><button class="nav" onclick="showTab('settings',this)">⚙ <span>Settings</span></button>
 <button class="nav-item" onclick="showTab('command-guard')" data-tab="command-guard">
   <span>◈</span> Command Guard
 </button>
@@ -215,6 +215,54 @@
 
   </div>
 </section>
+<section id="rules" class="tab hidden">
+
+  <div class="panel">
+    <div class="panel-head">
+      <div>
+        <h2>Detection Rules</h2>
+        <span class="muted">Active detection logic and MITRE ATT&amp;CK coverage</span>
+      </div>
+      <span class="live-pill">DETECTION ENGINE ACTIVE</span>
+    </div>
+
+    <div class="rules-overview">
+      <div class="rules-stat">
+        <span>TOTAL RULES</span>
+        <b id="rulesTotal">0</b>
+      </div>
+
+      <div class="rules-stat">
+        <span>ENABLED</span>
+        <b id="rulesEnabled">0</b>
+      </div>
+
+      <div class="rules-stat">
+        <span>HIGH / CRITICAL</span>
+        <b id="rulesHigh">0</b>
+      </div>
+
+      <div class="rules-stat">
+        <span>MITRE TECHNIQUES</span>
+        <b id="rulesTechniques">0</b>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head">
+      <div>
+        <h2>Configured Detection Logic</h2>
+        <span class="muted">Rules currently loaded by the SentinelSOC detection engine</span>
+      </div>
+      <span id="rulesCount" class="muted">0 rules</span>
+    </div>
+
+    <div id="rulesTable" class="rules-grid"></div>
+  </div>
+
+</section>
+
 <section id="blocked" class="tab hidden"><div class="panel"><div class="panel-head"><h2>IP Management</h2><span class="muted">Persistent application ban list</span></div><div class="ip-add"><input id="blockIP" placeholder="IP address"><button onclick="blockIP()">Block IP</button></div><div id="blockedTable"></div></div></section>
 <section id="reports" class="tab hidden">
 
