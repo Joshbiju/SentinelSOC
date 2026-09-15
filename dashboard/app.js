@@ -2177,6 +2177,62 @@ async function loadReports(){
         )
       );
 
+    // Security posture
+    const openIncidents =
+      (incidents || []).filter(x =>
+        !["resolved","closed"].includes(
+          String(x.status || "").toLowerCase()
+        )
+      );
+
+    const criticalAlerts =
+      (alerts || []).filter(x =>
+        String(x.severity || "").toLowerCase() === "critical"
+      ).length;
+
+    const highAlerts =
+      (alerts || []).filter(x =>
+        String(x.severity || "").toLowerCase() === "high"
+      ).length;
+
+    const riskScore = Math.min(
+      100,
+      (criticalAlerts * 20) +
+      (highAlerts * 10) +
+      (openIncidents.length * 8)
+    );
+
+    const riskLabel =
+      riskScore >= 80 ? "CRITICAL POSTURE" :
+      riskScore >= 60 ? "HIGH RISK POSTURE" :
+      riskScore >= 30 ? "ELEVATED POSTURE" :
+      "LOW RISK POSTURE";
+
+    const threatIPs =
+      new Set(
+        (iocs || [])
+          .filter(x =>
+            String(x.kind || "").toLowerCase() === "ip"
+          )
+          .map(x => String(x.value || ""))
+      );
+
+    const mitreTechniques =
+      new Set(
+        (alerts || [])
+          .map(x => String(x.technique || "").trim())
+          .filter(x => x && x !== "Unclassified")
+      );
+
+    setText("reportRisk", riskScore);
+    setText("reportRiskLabel", riskLabel);
+    setText("reportOpenIncidents", openIncidents.length);
+    setText("reportThreatIPs", threatIPs.size);
+    setText("reportMitre", mitreTechniques.size);
+
+    const timestamp = new Date().toLocaleString();
+    setText("reportTimestamp", `Generated ${timestamp}`);
+
     setText(
       "reportEvents",
       dashboardData.live_events ?? securityEvents.length
@@ -2322,6 +2378,32 @@ async function loadReports(){
         </div>
       `).join("")
       || '<div class="empty">No alerts</div>';
+
+    $("reportRecentIncidents").innerHTML =
+      (incidents || [])
+        .slice()
+        .sort((a,b) =>
+          String(b.created_at || "").localeCompare(
+            String(a.created_at || "")
+          )
+        )
+        .slice(0,8)
+        .map(x => `
+          <div class="row report-row">
+            <div>
+              <b>${esc(x.title || "Untitled incident")}</b>
+              <small>
+                ${esc(x.status || "unknown")} ·
+                Risk ${Number(x.risk || 0)}
+              </small>
+            </div>
+            <span class="${esc(String(x.severity || "").toLowerCase())}">
+              ${esc(x.severity || "unknown")}
+            </span>
+          </div>
+        `)
+        .join("")
+      || '<div class="empty">No incidents recorded</div>';
 
   }catch(err){
     console.error("Reports error:",err);

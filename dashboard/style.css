@@ -2108,3 +2108,71 @@ nav {
   }
 }
 
+
+/* =========================
+   SOC REPORT POSTURE
+   ========================= */
+
+.report-posture{
+  margin-bottom:20px;
+}
+
+.report-posture-grid{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:14px;
+  margin-top:16px;
+}
+
+.report-posture-card{
+  border:1px solid rgba(255,255,255,.08);
+  background:rgba(255,255,255,.025);
+  border-radius:10px;
+  padding:18px;
+  display:flex;
+  flex-direction:column;
+  gap:7px;
+}
+
+.report-posture-card span{
+  font-size:11px;
+  letter-spacing:.08em;
+  color:var(--muted);
+}
+
+.report-posture-card b{
+  font-size:28px;
+  line-height:1;
+}
+
+.report-posture-card small{
+  color:var(--muted);
+  font-size:11px;
+}
+
+#reportRecentIncidents .report-row{
+  align-items:center;
+}
+
+#reportRecentIncidents .report-row div{
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+}
+
+#reportRecentIncidents .report-row small{
+  color:var(--muted);
+}
+
+@media(max-width:900px){
+  .report-posture-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+}
+
+@media(max-width:600px){
+  .report-posture-grid{
+    grid-template-columns:1fr;
+  }
+}
+

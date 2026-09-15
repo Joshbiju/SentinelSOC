@@ -359,6 +359,42 @@
   </div>
 </div>
 
+<div class="panel report-posture">
+  <div class="panel-head">
+    <div>
+      <h2>Security Posture</h2>
+      <span class="muted">Current SentinelSOC security assessment</span>
+    </div>
+    <span id="reportTimestamp" class="muted">Not generated</span>
+  </div>
+
+  <div class="report-posture-grid">
+    <div class="report-posture-card">
+      <span>RISK SCORE</span>
+      <b id="reportRisk">0</b>
+      <small id="reportRiskLabel">Calculating posture</small>
+    </div>
+
+    <div class="report-posture-card">
+      <span>OPEN INCIDENTS</span>
+      <b id="reportOpenIncidents">0</b>
+      <small>Requires investigation</small>
+    </div>
+
+    <div class="report-posture-card">
+      <span>THREAT-LINKED IPs</span>
+      <b id="reportThreatIPs">0</b>
+      <small>Observed in threat intelligence</small>
+    </div>
+
+    <div class="report-posture-card">
+      <span>MITRE TECHNIQUES</span>
+      <b id="reportMitre">0</b>
+      <small>Observed detection coverage</small>
+    </div>
+  </div>
+</div>
+
 <div class="cards report-cards">
   <div>
     <label>Security Events <i></i></label>
@@ -441,6 +477,16 @@
     <span class="muted">Latest detection evidence</span>
   </div>
   <div id="reportRecentAlerts"></div>
+</div>
+
+<div class="panel">
+  <div class="panel-head">
+    <div>
+      <h2>Recent Incidents</h2>
+      <span class="muted">Latest incident response activity</span>
+    </div>
+  </div>
+  <div id="reportRecentIncidents"></div>
 </div>
 
 <div class="panel">

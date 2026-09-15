@@ -40,3 +40,7 @@ build/
 data/command_guard.json
 data/command_guard_allowlist.json
 data/command_guard_events.jsonl
+
+# Local SentinelSOC runtime database
+server/*.db
+server/*.db-*
