@@ -263,7 +263,90 @@
 
 </section>
 
-<section id="blocked" class="tab hidden"><div class="panel"><div class="panel-head"><h2>IP Management</h2><span class="muted">Persistent application ban list</span></div><div class="ip-add"><input id="blockIP" placeholder="IP address"><button onclick="blockIP()">Block IP</button></div><div id="blockedTable"></div></div></section>
+<section id="blocked" class="tab hidden">
+
+  <div class="panel">
+    <div class="panel-head">
+      <div>
+        <h2>IP Management</h2>
+        <span class="muted">IP intelligence, reputation and network enforcement</span>
+      </div>
+      <span class="live-pill">IP MONITORING ACTIVE</span>
+    </div>
+
+    <div class="ip-overview">
+      <div class="ip-stat">
+        <span>OBSERVED IPs</span>
+        <b id="ipTotal">0</b>
+      </div>
+
+      <div class="ip-stat">
+        <span>BLOCKED</span>
+        <b id="ipBlocked">0</b>
+      </div>
+
+      <div class="ip-stat">
+        <span>THREAT-LINKED</span>
+        <b id="ipThreat">0</b>
+      </div>
+
+      <div class="ip-stat">
+        <span>EXTERNAL</span>
+        <b id="ipExternal">0</b>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head">
+      <div>
+        <h2>IP Intelligence</h2>
+        <span class="muted">Observed source IPs from SentinelSOC telemetry</span>
+      </div>
+      <span id="ipCount" class="muted">0 IPs</span>
+    </div>
+
+    <div class="ip-controls">
+      <input
+        id="ipSearch"
+        type="text"
+        placeholder="Search IP address..."
+        oninput="renderIPManagement()"
+      >
+
+      <select id="ipFilter" onchange="renderIPManagement()">
+        <option value="all">All IPs</option>
+        <option value="internal">Internal</option>
+        <option value="external">External</option>
+        <option value="threat">Threat-linked</option>
+        <option value="blocked">Blocked</option>
+      </select>
+
+      <button type="button" onclick="loadIPManagement()">↻ Refresh</button>
+    </div>
+
+    <div id="ipTable" class="ip-grid"></div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head">
+      <div>
+        <h2>Blocked IP Repository</h2>
+        <span class="muted">Persistent application ban list</span>
+      </div>
+      <span id="blockedCount" class="muted">0 blocked</span>
+    </div>
+
+    <div class="ip-add">
+      <input id="blockIP" placeholder="IP address">
+      <input id="blockReason" placeholder="Reason (optional)">
+      <button type="button" onclick="blockIP()">Block IP</button>
+    </div>
+
+    <div id="blockedTable"></div>
+  </div>
+
+</section>
 <section id="reports" class="tab hidden">
 
 <div class="panel">

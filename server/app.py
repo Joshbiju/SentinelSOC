@@ -1188,17 +1188,16 @@ def threat_correlation():
         SELECT
             src_ip,
             COUNT(*) AS events,
-            GROUP_CONCAT(
-                DISTINCT dst_port
-            ) AS ports,
-            GROUP_CONCAT(
-                DISTINCT raw
-            ) AS raws
+            MIN(timestamp) AS first_seen,
+            MAX(timestamp) AS last_seen,
+            GROUP_CONCAT(DISTINCT dst_port) AS ports,
+            GROUP_CONCAT(DISTINCT raw) AS raws
         FROM events
         WHERE src_ip IS NOT NULL
+          AND TRIM(src_ip) != ''
         GROUP BY src_ip
         ORDER BY events DESC
-        LIMIT 50
+        LIMIT 100
         """,
         fetch=True,
     )
@@ -1209,33 +1208,29 @@ def threat_correlation():
 
         ports = []
 
-        if r[2]:
-
+        if r[4]:
             try:
                 ports = [
                     int(x)
-                    for x in r[2].split(",")
+                    for x in r[4].split(",")
                     if x
                 ]
-
             except Exception:
                 ports = []
 
         user_agents = []
 
-        if r[3]:
-
-            for raw in r[3].split("},{"):
-
+        if r[5]:
+            for raw in r[5].split("},{"):
                 if "User-Agent" in raw:
-                    user_agents.append(
-                        raw[:120]
-                    )
+                    user_agents.append(raw[:120])
 
         output.append(
             {
                 "source_ip": r[0],
                 "events": r[1],
+                "first_seen": r[2],
+                "last_seen": r[3],
                 "destination_ports": ports,
                 "user_agents": user_agents,
             }

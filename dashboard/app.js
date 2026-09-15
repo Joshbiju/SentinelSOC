@@ -1588,40 +1588,296 @@ async function removeIOC(id){
   }
 }
 
-async function loadBlocked(){
+let ipManagementRows = [];
+let ipBlockedRows = [];
+
+function isPrivateIP(ip){
+  const parts = String(ip || "").split(".").map(Number);
+
+  if(parts.length !== 4 || parts.some(Number.isNaN)){
+    return false;
+  }
+
+  if(parts[0] === 10) return true;
+  if(parts[0] === 127) return true;
+  if(parts[0] === 192 && parts[1] === 168) return true;
+
+  if(parts[0] === 172 && parts[1] >= 16 && parts[1] <= 31){
+    return true;
+  }
+
+  return false;
+}
+
+function renderIPManagement(){
+  const container = $("ipTable");
+  if(!container) return;
+
+  const search = ($("ipSearch")?.value || "").trim().toLowerCase();
+  const filter = $("ipFilter")?.value || "all";
+
+  const filtered = ipManagementRows.filter(x => {
+    const ip = String(x.ip || "").toLowerCase();
+
+    if(search && !ip.includes(search)){
+      return false;
+    }
+
+    if(filter === "internal" && x.scope !== "internal"){
+      return false;
+    }
+
+    if(filter === "external" && x.scope !== "external"){
+      return false;
+    }
+
+    if(filter === "threat" && !x.threat_linked){
+      return false;
+    }
+
+    if(filter === "blocked" && !x.blocked){
+      return false;
+    }
+
+    return true;
+  });
+
+  const count = $("ipCount");
+  if(count){
+    count.textContent =
+      `${filtered.length} IP${filtered.length === 1 ? "" : "s"}`;
+  }
+
+  if(!filtered.length){
+    container.innerHTML =
+      '<div class="empty">No matching IP intelligence found</div>';
+    return;
+  }
+
+  container.innerHTML = filtered.map(x => {
+    const badges = [
+      `<span class="ip-badge ${x.scope}">
+        ${x.scope === "internal" ? "INTERNAL" : "EXTERNAL"}
+      </span>`,
+      x.threat_linked
+        ? '<span class="ip-badge threat">THREAT-LINKED</span>'
+        : "",
+      x.blocked
+        ? '<span class="ip-badge blocked">BLOCKED</span>'
+        : ""
+    ].join("");
+
+    const ports =
+      Array.isArray(x.destination_ports) && x.destination_ports.length
+        ? x.destination_ports.join(", ")
+        : "No destination ports";
+
+    const action = x.blocked
+      ? `<button
+          type="button"
+          class="success"
+          onclick="unblockIP('${esc(x.ip)}')">
+          Unblock
+        </button>`
+      : `<button
+          type="button"
+          class="danger"
+          onclick="blockIP('${esc(x.ip)}')">
+          Block IP
+        </button>`;
+
+    return `
+      <div class="ip-card">
+        <div class="ip-card-head">
+          <div class="ip-address">${esc(x.ip)}</div>
+          <div class="ip-badges">${badges}</div>
+        </div>
+
+        <div class="ip-card-meta">
+          <div class="ip-meta-item">
+            <span>EVENTS</span>
+            <b>${Number(x.events || 0)}</b>
+          </div>
+
+          <div class="ip-meta-item">
+            <span>FIRST SEEN</span>
+            <b>${esc(x.first_seen || "—")}</b>
+          </div>
+
+          <div class="ip-meta-item">
+            <span>LAST SEEN</span>
+            <b>${esc(x.last_seen || "—")}</b>
+          </div>
+        </div>
+
+        <div class="ip-ports">
+          Destination ports: ${esc(ports)}
+        </div>
+
+        <div class="ip-card-actions">
+          ${action}
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+function renderBlockedIPs(){
+  const container = $("blockedTable");
+  if(!container) return;
+
+  const count = $("blockedCount");
+  if(count){
+    count.textContent =
+      `${ipBlockedRows.length} blocked`;
+  }
+
+  container.innerHTML =
+    ipBlockedRows.map(x => `
+      <div class="ip-blocked">
+        <div class="ip-blocked-info">
+          <b>${esc(x.ip)}</b>
+          <small>${esc(x.reason || "Manual SOC analyst block")}</small>
+          <div class="ip-blocked-time">
+            Blocked: ${esc(x.blocked_at || "—")}
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onclick="unblockIP('${esc(x.ip)}')">
+          Unblock
+        </button>
+      </div>
+    `).join("") ||
+    '<div class="empty">No blocked IPs</div>';
+}
+
+async function loadIPManagement(){
   try{
     const rows =
       await get("/api/v2/ip-management");
 
-    const container =
-      $("blockedTable") || $("blockedList");
+    ipBlockedRows = Array.isArray(rows) ? rows : [];
 
-    if(!container) return;
+    const blockedSet =
+      new Set(ipBlockedRows.map(x => String(x.ip)));
 
-    container.innerHTML =
-      rows.map(x=>`
-        <div class="row">
-          <div>
-            <b>${esc(x.ip)}</b>
-            <small>${esc(x.reason || "")}</small>
-          </div>
+    const intel =
+      await get("/api/v2/threat-intel/correlation");
 
-          <button
-            type="button"
-            onclick="unblockIP('${esc(x.ip)}')">
-            Unblock
-          </button>
-        </div>
-      `).join("") ||
-      '<div class="empty">No blocked IPs</div>';
+    const intelRows =
+      Array.isArray(intel) ? intel : [];
+
+    const intelMap = new Map(
+      intelRows.map(x => [
+        String(x.source_ip),
+        x
+      ])
+    );
+
+    const observed = intelRows.map(x => {
+      const ip = String(x.source_ip || "");
+      const threat = intelMap.get(ip) || {};
+
+      return {
+        ip,
+        events: Number(threat.events || 0),
+        destination_ports:
+          Array.isArray(threat.destination_ports)
+            ? threat.destination_ports
+            : [],
+        first_seen: threat.first_seen || "",
+        last_seen: threat.last_seen || "",
+        scope: isPrivateIP(ip) ? "internal" : "external",
+        threat_linked: false,
+        blocked: blockedSet.has(ip)
+      };
+    });
+
+    /*
+     * Mark IPs that match locally stored IOCs.
+     * The existing IOC endpoint is used rather than
+     * introducing another database structure.
+     */
+    try{
+      const iocs = await get("/api/v2/iocs");
+
+      const values = new Set(
+        (Array.isArray(iocs) ? iocs : [])
+          .filter(x => String(x.kind || "").toLowerCase() === "ip")
+          .map(x => String(x.value || ""))
+      );
+
+      observed.forEach(x => {
+        x.threat_linked = values.has(x.ip);
+      });
+    }catch(iocErr){
+      console.warn(
+        "[SentinelSOC] IOC correlation unavailable:",
+        iocErr
+      );
+    }
+
+    ipManagementRows = observed;
+
+    const total = $("ipTotal");
+    const blocked = $("ipBlocked");
+    const threat = $("ipThreat");
+    const external = $("ipExternal");
+
+    if(total){
+      total.textContent = observed.length;
+    }
+
+    if(blocked){
+      blocked.textContent =
+        observed.filter(x => x.blocked).length;
+    }
+
+    if(threat){
+      threat.textContent =
+        observed.filter(x => x.threat_linked).length;
+    }
+
+    if(external){
+      external.textContent =
+        observed.filter(x => x.scope === "external").length;
+    }
+
+    renderIPManagement();
+    renderBlockedIPs();
 
   }catch(err){
-    console.error("[SentinelSOC] blocked:",err);
+    console.error("[SentinelSOC] IP management:", err);
+
+    const container = $("ipTable");
+
+    if(container){
+      container.innerHTML =
+        '<div class="empty">Unable to load IP intelligence</div>';
+    }
   }
+}
+
+async function loadBlocked(){
+  await loadIPManagement();
 }
 
 async function blockIP(ip,reason){
   try{
+    if(!ip){
+      ip = ($("blockIP")?.value || "").trim();
+      reason = ($("blockReason")?.value || "").trim();
+    }
+
+    if(!ip){
+      alert("Enter an IP address");
+      return;
+    }
+
+    reason = reason || "Manual SOC analyst block";
+
     await fetch(
       "/api/v2/ip-management/" +
       encodeURIComponent(ip) +
@@ -1632,11 +1888,13 @@ async function blockIP(ip,reason){
           "Content-Type":"application/json"
         },
         body:JSON.stringify({
-          reason:reason ||
-            "Manual SOC analyst block"
+          reason:reason
         })
       }
     );
+
+    if($("blockIP")) $("blockIP").value = "";
+    if($("blockReason")) $("blockReason").value = "";
 
     await loadBlocked();
 
