@@ -237,73 +237,52 @@ async function loadEvents(srcIp="", threatType=""){
    ALERTS / L1 TRIAGE
    ========================= */
 
+let alertCache = [];
+
 async function loadAlerts(){
   try{
     const alerts = await get("/api/v2/alerts?limit=150");
 
-    setHTML(
-      "alertTable",
-      alerts.map(x=>`
-        <div class="row alert-row">
-          <div>
-            <b class="${esc(x.severity)}">
-              ${esc(x.title)}
-            </b>
+    alertCache = alerts || [];
 
-            <small>
-              ${esc(x.created_at)}
-              · Risk ${x.risk}
-              · ${esc(x.technique || "Unclassified")}
-              · Status: ${esc(x.status)}
-            </small>
+    const critical = alertCache.filter(x =>
+      String(x.severity || "").toLowerCase() === "critical"
+    ).length;
 
-            <p>${esc(x.description)}</p>
-          </div>
+    const high = alertCache.filter(x =>
+      String(x.severity || "").toLowerCase() === "high"
+    ).length;
 
-          <div class="actions">
+    const active = alertCache.filter(x =>
+      !["resolved","closed"].includes(
+        String(x.status || "").toLowerCase()
+      )
+    ).length;
 
-            <button
-              type="button"
-              class="alert-action"
-              data-alert-id="${x.id}"
-              data-alert-status="acknowledged">
-              Acknowledge
-            </button>
+    const acknowledged = alertCache.filter(x =>
+      String(x.status || "").toLowerCase() === "acknowledged"
+    ).length;
 
-            <button
-              type="button"
-              class="investigate-alert-action"
-              data-alert-id="${x.id}">
-              Investigate
-            </button>
+    const resolved = alertCache.filter(x =>
+      ["resolved","closed"].includes(
+        String(x.status || "").toLowerCase()
+      )
+    ).length;
 
-            <button
-              type="button"
-              class="incident-action"
-              data-alert-id="${x.id}"
-              onclick="makeIncident(${x.id})">
-              Create Incident
-            </button>
+    setText("alertTotal", alertCache.length);
+    setText("alertCritical", critical);
+    setText("alertHigh", high);
+    setText("alertActive", active);
+    setText("alertAcknowledged", acknowledged);
+    setText("alertResolved", resolved);
 
-            <button
-              type="button"
-              class="alert-action"
-              data-alert-id="${x.id}"
-              data-alert-status="resolved">
-              Resolve
-            </button>
-
-          </div>
-        </div>
-      `).join("") ||
-      '<div class="empty">No alerts</div>'
-    );
+    renderAlerts();
 
     const ips = {};
 
-    alerts.forEach(x=>{
+    alertCache.forEach(x=>{
       if(x.event_id){
-        ips[x.title]=(ips[x.title]||0)+1;
+        ips[x.title] = (ips[x.title] || 0) + 1;
       }
     });
 
@@ -316,13 +295,170 @@ async function loadAlerts(){
             <b>${esc(k)}</b>
             <span>${v} alerts</span>
           </div>
-        `).join("") ||
-      '<div class="muted">No alerts yet.</div>'
+        `).join("")
+        || '<div class="muted">No alerts yet.</div>'
     );
 
   }catch(err){
     console.error("[SentinelSOC] alerts:",err);
   }
+}
+
+function renderAlerts(){
+  const container = $("alertTable");
+
+  if(!container){
+    return;
+  }
+
+  const search =
+    String($("alertSearch")?.value || "")
+      .trim()
+      .toLowerCase();
+
+  const severity =
+    String($("alertSeverityFilter")?.value || "all")
+      .toLowerCase();
+
+  const status =
+    String($("alertStatusFilter")?.value || "all")
+      .toLowerCase();
+
+  const filtered = alertCache.filter(x=>{
+
+    const itemSeverity =
+      String(x.severity || "").toLowerCase();
+
+    const itemStatus =
+      String(x.status || "").toLowerCase();
+
+    const haystack = [
+      x.title,
+      x.description,
+      x.technique,
+      x.tactic,
+      x.status
+    ]
+      .map(v=>String(v || "").toLowerCase())
+      .join(" ");
+
+    return (
+      (!search || haystack.includes(search)) &&
+      (severity === "all" || itemSeverity === severity) &&
+      (status === "all" || itemStatus === status)
+    );
+  });
+
+  setText(
+    "alertCount",
+    filtered.length +
+      (filtered.length === 1 ? " alert" : " alerts")
+  );
+
+  container.innerHTML =
+    filtered.map(x=>{
+
+      const sev =
+        String(x.severity || "medium").toLowerCase();
+
+      const stat =
+        String(x.status || "open").toLowerCase();
+
+      return `
+        <div class="alert-card">
+
+          <div class="alert-card-head">
+
+            <div>
+              <span class="alert-id">
+                ALERT-${String(x.id).padStart(4,"0")}
+              </span>
+
+              <span class="alert-severity ${esc(sev)}">
+                ${esc(sev.toUpperCase())}
+              </span>
+
+              <span class="alert-status ${esc(stat)}">
+                ${esc(stat.toUpperCase())}
+              </span>
+            </div>
+
+            <strong class="alert-risk">
+              RISK ${Number(x.risk ?? 0)}
+            </strong>
+
+          </div>
+
+          <div class="alert-card-body">
+
+            <h3>${esc(x.title || "Untitled alert")}</h3>
+
+            <p>
+              ${esc(
+                x.description ||
+                "No alert description available."
+              )}
+            </p>
+
+            <div class="alert-meta">
+
+              <span>
+                <b>Detected</b>
+                ${esc(x.created_at || "")}
+              </span>
+
+              <span>
+                <b>Technique</b>
+                ${esc(x.technique || "Unclassified")}
+              </span>
+
+              <span>
+                <b>Tactic</b>
+                ${esc(x.tactic || "Unclassified")}
+              </span>
+
+            </div>
+
+          </div>
+
+          <div class="actions alert-actions">
+
+            <button
+              type="button"
+              class="alert-action"
+              data-alert-id="${Number(x.id)}"
+              data-alert-status="acknowledged">
+              Acknowledge
+            </button>
+
+            <button
+              type="button"
+              class="investigate-alert-action"
+              data-alert-id="${Number(x.id)}">
+              Investigate
+            </button>
+
+            <button
+              type="button"
+              class="incident-action"
+              data-alert-id="${Number(x.id)}">
+              Create Incident
+            </button>
+
+            <button
+              type="button"
+              class="alert-action"
+              data-alert-id="${Number(x.id)}"
+              data-alert-status="resolved">
+              Resolve
+            </button>
+
+          </div>
+
+        </div>
+      `;
+    }).join("")
+    || '<div class="empty">No alerts match the current filters</div>';
 }
 
 async function setAlert(id,status){

@@ -13,7 +13,88 @@
 <div class="two-col"><div class="panel"><h2>⚠ Top Attack Types</h2><div id="attackTypes" class="empty">Waiting for security events</div></div><div class="panel"><h2>◎ Top Source IPs</h2><div id="sources" class="list"></div></div></div>
 <div class="panel"><div class="panel-head"><h2>⌁ Live Security Events</h2><button onclick="showTab('events')">View all</button></div><div id="live"></div></div></section>
 <section id="events" class="tab hidden"><div class="panel"><div class="panel-head"><h2>Event Explorer</h2><span id="eventFilterLabel" class="muted"></span></div><div id="eventTable"></div></div></section>
-<section id="alerts" class="tab hidden"><div class="panel"><div class="panel-head"><h2>Alert Queue / L1 Triage</h2><span class="live-pill">REAL TIME</span></div><div id="alertTable"></div></div></section>
+<section id="alerts" class="tab hidden">
+
+  <div class="panel">
+    <div class="panel-head">
+      <div>
+        <h2>Alert Operations Center</h2>
+        <span class="muted">Detection output, L1 triage and escalation workflow</span>
+      </div>
+      <span class="live-pill">REAL TIME</span>
+    </div>
+
+    <div class="alert-overview">
+      <div class="alert-stat">
+        <span>TOTAL ALERTS</span>
+        <b id="alertTotal">0</b>
+      </div>
+
+      <div class="alert-stat">
+        <span>CRITICAL</span>
+        <b id="alertCritical">0</b>
+      </div>
+
+      <div class="alert-stat">
+        <span>HIGH</span>
+        <b id="alertHigh">0</b>
+      </div>
+
+      <div class="alert-stat">
+        <span>ACTIVE</span>
+        <b id="alertActive">0</b>
+      </div>
+
+      <div class="alert-stat">
+        <span>ACKNOWLEDGED</span>
+        <b id="alertAcknowledged">0</b>
+      </div>
+
+      <div class="alert-stat">
+        <span>RESOLVED</span>
+        <b id="alertResolved">0</b>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head">
+      <div>
+        <h2>Alert Queue / L1 Triage</h2>
+        <span class="muted">Prioritized detection findings from SentinelSOC</span>
+      </div>
+      <span id="alertCount" class="muted">0 alerts</span>
+    </div>
+
+    <div class="alert-controls">
+      <input
+        id="alertSearch"
+        type="text"
+        placeholder="Search alerts..."
+        oninput="renderAlerts()">
+
+      <select id="alertSeverityFilter" onchange="renderAlerts()">
+        <option value="all">All severities</option>
+        <option value="critical">Critical</option>
+        <option value="high">High</option>
+        <option value="medium">Medium</option>
+        <option value="low">Low</option>
+      </select>
+
+      <select id="alertStatusFilter" onchange="renderAlerts()">
+        <option value="all">All statuses</option>
+        <option value="open">Open</option>
+        <option value="acknowledged">Acknowledged</option>
+        <option value="resolved">Resolved</option>
+      </select>
+
+      <button type="button" onclick="loadAlerts()">↻ Refresh</button>
+    </div>
+
+    <div id="alertTable" class="alert-grid"></div>
+  </div>
+
+</section>
 <section id="incidents" class="tab hidden">
 
   <div class="panel">
