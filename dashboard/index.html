@@ -14,7 +14,66 @@
 <div class="panel"><div class="panel-head"><h2>⌁ Live Security Events</h2><button onclick="showTab('events')">View all</button></div><div id="live"></div></div></section>
 <section id="events" class="tab hidden"><div class="panel"><div class="panel-head"><h2>Event Explorer</h2><span id="eventFilterLabel" class="muted"></span></div><div id="eventTable"></div></div></section>
 <section id="alerts" class="tab hidden"><div class="panel"><div class="panel-head"><h2>Alert Queue / L1 Triage</h2><span class="live-pill">REAL TIME</span></div><div id="alertTable"></div></div></section>
-<section id="incidents" class="tab hidden"><div class="panel"><div class="panel-head"><h2>Incident Triage — Kanban</h2><button type="button" onclick="createIncident()">+ New Incident</button></div><div id="incidentBoard" class="kanban"></div></div></section>
+<section id="incidents" class="tab hidden">
+
+  <div class="panel">
+    <div class="panel-head">
+      <div>
+        <h2>Incident Response Center</h2>
+        <span class="muted">Security incidents, investigation workflow and response state</span>
+      </div>
+      <div class="incident-header-actions">
+        <span class="live-pill">INCIDENT RESPONSE ACTIVE</span>
+        <button type="button" onclick="createIncident()">+ New Incident</button>
+      </div>
+    </div>
+
+    <div class="incident-overview">
+      <div class="incident-stat">
+        <span>TOTAL INCIDENTS</span>
+        <b id="incidentTotal">0</b>
+      </div>
+
+      <div class="incident-stat">
+        <span>OPEN</span>
+        <b id="incidentOpen">0</b>
+      </div>
+
+      <div class="incident-stat">
+        <span>INVESTIGATING</span>
+        <b id="incidentInvestigating">0</b>
+      </div>
+
+      <div class="incident-stat">
+        <span>CONTAINED</span>
+        <b id="incidentContained">0</b>
+      </div>
+
+      <div class="incident-stat">
+        <span>RESOLVED</span>
+        <b id="incidentResolved">0</b>
+      </div>
+
+      <div class="incident-stat">
+        <span>HIGH / CRITICAL</span>
+        <b id="incidentPriority">0</b>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head">
+      <div>
+        <h2>Incident Triage</h2>
+        <span class="muted">Track incidents through the SOC response lifecycle</span>
+      </div>
+      <span id="incidentCount" class="muted">0 incidents</span>
+    </div>
+
+    <div id="incidentBoard" class="kanban"></div>
+  </div>
+
+</section>
 <section id="campaigns" class="tab hidden">
   <div class="panel campaign-panel">
     <div class="panel-head campaign-head">

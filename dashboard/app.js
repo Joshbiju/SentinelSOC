@@ -500,6 +500,30 @@ async function loadIncidents(){
       return;
     }
 
+    const total = incidents.length;
+
+    const countStatus = status =>
+      incidents.filter(x =>
+        String(x.status || "open").toLowerCase() === status
+      ).length;
+
+    const priority = incidents.filter(x =>
+      ["critical","high"].includes(
+        String(x.severity || "").toLowerCase()
+      )
+    ).length;
+
+    setText("incidentTotal", total);
+    setText("incidentOpen", countStatus("open"));
+    setText("incidentInvestigating", countStatus("investigating"));
+    setText("incidentContained", countStatus("contained"));
+    setText("incidentResolved", countStatus("closed"));
+    setText("incidentPriority", priority);
+    setText(
+      "incidentCount",
+      total + (total === 1 ? " incident" : " incidents")
+    );
+
     const statuses = [
       ["open","OPEN"],
       ["investigating","INVESTIGATING"],
@@ -520,9 +544,14 @@ async function loadIncidents(){
       let cards = "";
 
       if(items.length === 0){
-        cards = '<div class="muted">No incidents</div>';
+        cards = '<div class="muted incident-empty">No incidents</div>';
       }else{
         for(const x of items){
+
+          const severity =
+            String(x.severity || "high").toLowerCase();
+
+          const risk = Number(x.risk ?? 0);
 
           let actions = "";
 
@@ -553,35 +582,62 @@ async function loadIncidents(){
           }
 
           cards +=
-            '<div class="ticket" draggable="true" data-incident-id="' +
+            '<div class="ticket incident-ticket" draggable="true" data-incident-id="' +
             Number(x.id) +
             '">' +
-              '<b>' + esc(x.title) + '</b>' +
-              '<small>' +
-                esc(x.severity || "high") +
-                ' · Risk ' +
-                String(x.risk ?? 0) +
-                ' · ' +
+
+              '<div class="incident-ticket-head">' +
+                '<span class="incident-id">INC-' +
+                String(x.id).padStart(4,"0") +
+                '</span>' +
+                '<span class="incident-severity ' +
+                esc(severity) +
+                '">' +
+                esc(severity.toUpperCase()) +
+                '</span>' +
+              '</div>' +
+
+              '<b class="incident-title">' +
+                esc(x.title || "Untitled incident") +
+              '</b>' +
+
+              '<p>' +
+                esc(x.summary || "No incident summary available.") +
+              '</p>' +
+
+              '<div class="incident-ticket-meta">' +
+                '<span>Risk <strong>' +
+                risk +
+                '</strong></span>' +
+                '<span>' +
                 esc(x.owner || "SOC Analyst") +
+                '</span>' +
+              '</div>' +
+
+              '<small class="incident-time">' +
+                esc(x.updated_at || x.created_at || "") +
               '</small>' +
-              '<p>' + esc(x.summary || "") + '</p>' +
+
               '<div class="actions">' +
                 actions +
               '</div>' +
+
             '</div>';
         }
       }
 
       html +=
-        '<div class="kanban-col" data-status="' +
+        '<div class="kanban-col incident-column" data-status="' +
         status +
         '">' +
-          '<h3>' +
-            title +
-            ' (' +
-            items.length +
-            ')' +
-          '</h3>' +
+          '<div class="incident-column-head">' +
+            '<h3>' +
+              title +
+            '</h3>' +
+            '<span>' +
+              items.length +
+            '</span>' +
+          '</div>' +
           '<div class="dropzone">' +
             cards +
           '</div>' +
