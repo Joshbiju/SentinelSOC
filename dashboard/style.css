@@ -2736,3 +2736,144 @@ nav {
   }
 }
 
+
+/* =========================
+   DETECTION VALIDATION CENTER
+   ========================= */
+
+.campaign-head-actions{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.campaign-overview{
+  display:grid;
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  gap:12px;
+  margin-top:16px;
+}
+
+.campaign-stat{
+  border:1px solid rgba(255,255,255,.08);
+  background:rgba(255,255,255,.025);
+  border-radius:10px;
+  padding:16px;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+
+.campaign-stat span{
+  color:var(--muted);
+  font-size:10px;
+  letter-spacing:.08em;
+}
+
+.campaign-stat b{
+  font-size:26px;
+  line-height:1;
+}
+
+.campaign-stat small{
+  color:var(--muted);
+  font-size:10px;
+}
+
+.campaign-validation-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px;
+  margin-top:14px;
+}
+
+.campaign-validation-grid div{
+  border:1px solid rgba(255,255,255,.05);
+  border-radius:7px;
+  padding:9px;
+}
+
+.campaign-validation-grid span{
+  display:block;
+  color:var(--muted);
+  font-size:8px;
+  letter-spacing:.06em;
+  margin-bottom:5px;
+}
+
+.campaign-validation-grid strong{
+  display:block;
+  font-size:10px;
+}
+
+.campaign-rule{
+  display:flex;
+  flex-direction:column;
+  gap:5px;
+}
+
+.campaign-rule small{
+  color:var(--muted);
+  font-size:9px;
+}
+
+.campaign-status.detected{
+  border-color:rgba(255,80,80,.55);
+}
+
+.campaign-last{
+  margin-top:12px;
+  padding-top:10px;
+  border-top:1px solid rgba(255,255,255,.05);
+}
+
+.campaign-last span{
+  display:block;
+  color:var(--muted);
+  font-size:8px;
+  letter-spacing:.07em;
+  margin-bottom:4px;
+}
+
+.campaign-last b{
+  font-size:10px;
+  font-weight:500;
+}
+
+.campaign-activity-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+}
+
+.campaign-activity-row small{
+  display:block;
+  color:var(--muted);
+  margin-top:4px;
+}
+
+@media(max-width:1000px){
+
+  .campaign-overview{
+    grid-template-columns:repeat(3,minmax(0,1fr));
+  }
+
+}
+
+@media(max-width:650px){
+
+  .campaign-overview{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+
+  .campaign-head-actions{
+    flex-wrap:wrap;
+  }
+
+  .campaign-validation-grid{
+    grid-template-columns:1fr;
+  }
+
+}
+
