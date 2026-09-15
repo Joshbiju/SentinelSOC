@@ -1373,22 +1373,53 @@ def assets():
     rows = execute(
         """
         SELECT
-            hostname,
-            os,
-            status,
-            collection
-        FROM assets
-        ORDER BY hostname
+            a.id,
+            a.hostname,
+            a.os,
+            a.status,
+            a.collection,
+
+            (
+                SELECT COUNT(*)
+                FROM events e
+                WHERE e.source = 'local_monitor'
+            ) AS event_count,
+
+            (
+                SELECT COUNT(*)
+                FROM alerts al
+                WHERE al.status NOT IN ('closed', 'resolved')
+            ) AS alert_count,
+
+            (
+                SELECT COALESCE(MAX(al.risk), 0)
+                FROM alerts al
+                WHERE al.status NOT IN ('closed', 'resolved')
+            ) AS risk,
+
+            (
+                SELECT MAX(e.timestamp)
+                FROM events e
+                WHERE e.source = 'local_monitor'
+            ) AS last_seen
+
+        FROM assets a
+        ORDER BY a.hostname
         """,
         fetch=True,
     )
 
     return [
         {
-            "hostname": r[0],
-            "os": r[1],
-            "status": r[2],
-            "collection": r[3],
+            "id": r[0],
+            "hostname": r[1],
+            "os": r[2],
+            "status": r[3],
+            "collection": r[4],
+            "event_count": r[5] or 0,
+            "alert_count": r[6] or 0,
+            "risk": r[7] or 0,
+            "last_seen": r[8],
         }
         for r in rows
     ]

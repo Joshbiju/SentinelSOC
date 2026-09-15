@@ -1441,3 +1441,163 @@ nav {
   z-index: 10 !important;
 }
 
+
+/* ============================================================
+   ASSETS
+   ============================================================ */
+
+.status-pill{
+  color:#16dc91;
+  border:1px solid #244a43;
+  background:#0a201e;
+  padding:7px 11px;
+  border-radius:6px;
+  font-size:10px;
+  font-weight:700;
+  letter-spacing:.04em;
+}
+
+.asset-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
+  gap:14px;
+}
+
+.asset-card{
+  background:#0a1425;
+  border:1px solid #20314e;
+  border-radius:9px;
+  padding:17px;
+  transition:border-color .2s,transform .2s;
+}
+
+.asset-card:hover{
+  border-color:#2d5478;
+  transform:translateY(-1px);
+}
+
+.asset-card-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:16px;
+}
+
+.asset-host{
+  color:#eaf2ff;
+  font-size:17px;
+  font-weight:800;
+}
+
+.asset-icon{
+  color:#08c7e5;
+  margin-right:7px;
+}
+
+.asset-os{
+  color:#71809a;
+  font-size:11px;
+  margin-top:5px;
+}
+
+.asset-status{
+  padding:5px 8px;
+  border-radius:5px;
+  font-size:9px;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:.05em;
+}
+
+.asset-status.online{
+  color:#18dd89;
+  background:#09231d;
+  border:1px solid #1b5645;
+}
+
+.asset-status.offline{
+  color:#ff6870;
+  background:#2a1117;
+  border:1px solid #63303a;
+}
+
+.asset-collection{
+  padding:11px 0;
+  border-top:1px solid #19283f;
+  border-bottom:1px solid #19283f;
+}
+
+.asset-collection span,
+.asset-last-seen span,
+.asset-stat span{
+  display:block;
+  color:#61718b;
+  font-size:9px;
+  font-weight:700;
+  letter-spacing:.07em;
+}
+
+.asset-collection b{
+  display:block;
+  color:#aebbd0;
+  font-size:11px;
+  margin-top:5px;
+  font-weight:600;
+}
+
+.asset-stats{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+  padding:15px 0;
+}
+
+.asset-stat{
+  background:#0e1a2d;
+  border:1px solid #1b2b45;
+  border-radius:6px;
+  padding:10px;
+}
+
+.asset-stat b{
+  display:block;
+  color:#dce7f8;
+  font-size:19px;
+  margin-top:6px;
+}
+
+.asset-stat .risk-low{
+  color:#18dd89;
+}
+
+.asset-stat .risk-medium{
+  color:#ffd264;
+}
+
+.asset-stat .risk-high{
+  color:#ff5965;
+}
+
+.asset-last-seen{
+  border-top:1px solid #19283f;
+  padding-top:12px;
+}
+
+.asset-last-seen b{
+  display:block;
+  color:#8b9ab1;
+  font-size:10px;
+  font-weight:500;
+  margin-top:5px;
+}
+
+@media(max-width:700px){
+  .asset-grid{
+    grid-template-columns:1fr;
+  }
+
+  .asset-card-head{
+    flex-direction:column;
+  }
+}

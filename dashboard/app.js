@@ -1152,26 +1152,92 @@ document.addEventListener("click",function(e){
 
 async function loadAssets(){
   try{
-    const assets =
-      await get("/api/v2/assets");
+    const assets = await get("/api/v2/assets");
 
     const container =
       $("assetTable") || $("assetsList");
 
     if(!container) return;
 
-    container.innerHTML =
-      assets.map(x=>`
-        <div class="row">
-          <b>${esc(x.hostname)}</b>
-          <small>
-            ${esc(x.os)}
-            · ${esc(x.status)}
-            · ${esc(x.collection)}
-          </small>
-        </div>
-      `).join("") ||
-      '<div class="empty">No assets</div>';
+    if(!assets.length){
+      container.innerHTML =
+        '<div class="empty">No monitored assets</div>';
+      return;
+    }
+
+    container.innerHTML = `
+      <div class="asset-grid">
+        ${assets.map(x=>{
+          const risk = Number(x.risk || 0);
+
+          let riskClass = "low";
+          if(risk >= 70) riskClass = "high";
+          else if(risk >= 40) riskClass = "medium";
+
+          const statusClass =
+            String(x.status || "").toLowerCase() === "online"
+              ? "online"
+              : "offline";
+
+          const lastSeen = x.last_seen
+            ? new Date(x.last_seen).toLocaleString()
+            : "Never";
+
+          return `
+            <div class="asset-card">
+
+              <div class="asset-card-head">
+                <div>
+                  <div class="asset-host">
+                    <span class="asset-icon">▣</span>
+                    ${esc(x.hostname)}
+                  </div>
+                  <div class="asset-os">
+                    ${esc(x.os || "Unknown OS")}
+                  </div>
+                </div>
+
+                <span class="asset-status ${statusClass}">
+                  ${esc(x.status || "unknown")}
+                </span>
+              </div>
+
+              <div class="asset-collection">
+                <span>COLLECTION</span>
+                <b>${esc(x.collection || "Unknown")}</b>
+              </div>
+
+              <div class="asset-stats">
+
+                <div class="asset-stat">
+                  <span>EVENTS</span>
+                  <b>${Number(x.event_count || 0).toLocaleString()}</b>
+                </div>
+
+                <div class="asset-stat">
+                  <span>ALERTS</span>
+                  <b>${Number(x.alert_count || 0).toLocaleString()}</b>
+                </div>
+
+                <div class="asset-stat">
+                  <span>RISK</span>
+                  <b class="risk-${riskClass}">
+                    ${risk}
+                  </b>
+                </div>
+
+              </div>
+
+              <div class="asset-last-seen">
+                <span>LAST TELEMETRY</span>
+                <b>${esc(lastSeen)}</b>
+              </div>
+
+            </div>
+          `;
+        }).join("")}
+      </div>
+    `;
 
   }catch(err){
     console.error("[SentinelSOC] assets:",err);
