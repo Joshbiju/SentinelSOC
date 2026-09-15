@@ -36,7 +36,31 @@ def detect(event):
     # Baseline telemetry is deliberately excluded from security detections.
     if event.get("event_type") in {"system_metrics", "process_inventory", "network_inventory"}:
         return []
-    return [r for r in load_rules() if r.get("enabled", True) and matches(event, r.get("conditions", {}))]
+
+    matched = []
+
+    for rule in load_rules():
+        if not rule.get("enabled", True):
+            continue
+
+        if not matches(event, rule.get("conditions", {})):
+            continue
+
+        # Prevent the same rule from generating an alert for every
+        # repeated telemetry event during the configured cooldown.
+        rule_id = rule.get("id")
+        cooldown_key = f"rule:{rule_id}"
+
+        if (
+            cooldown_key in _last_alert
+            and (now() - _last_alert[cooldown_key]).total_seconds() < ALERT_COOLDOWN
+        ):
+            continue
+
+        _last_alert[cooldown_key] = now()
+        matched.append(rule)
+
+    return matched
 
 def failed_login_correlation(event):
     if event.get("event_type") != "login_failed" or not event.get("src_ip"):
