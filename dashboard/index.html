@@ -255,91 +255,98 @@
 
 </section>
 <section id="campaigns" class="tab hidden">
+
   <div class="panel campaign-panel">
+
     <div class="panel-head campaign-head">
       <div>
-        <h2>Attack Campaigns</h2>
-        <span class="muted">Authorized lab detection scenarios</span>
+        <h2>Detection Validation Center</h2>
+        <span class="muted">Authorized lab scenarios validated against real SentinelSOC telemetry</span>
       </div>
-      <span class="live-pill">REAL TELEMETRY</span>
+
+      <div class="campaign-head-actions">
+        <span class="live-pill">REAL TELEMETRY</span>
+        <button type="button" onclick="loadCampaigns()">↻ Refresh</button>
+      </div>
     </div>
 
     <div class="campaign-notice">
       <span class="campaign-notice-icon">◉</span>
       <div>
-        <strong>Detection validation environment</strong>
-        <p>No fake alerts are generated. Campaigns become active only when real monitored telemetry satisfies the detection logic.</p>
+        <strong>Controlled detection validation environment</strong>
+        <p>
+          No synthetic alerts are generated. Scenario status is calculated
+          from monitored telemetry and the active detection engine.
+        </p>
       </div>
     </div>
 
-    <div class="campaign-grid">
+    <div class="campaign-overview">
 
-      <article class="campaign-card" data-campaign="bruteforce">
-        <div class="campaign-card-top">
-          <span class="campaign-icon">⚠</span>
-          <span id="campaignStatusBrute" class="campaign-status monitoring">MONITORING</span>
-        </div>
-        <h3>SSH Brute Force</h3>
-        <p class="campaign-description">
-          Detects repeated failed SSH authentication attempts from a single source.
-        </p>
-        <div class="campaign-rule">
-          <span>TRIGGER</span>
-          <b>5 failed attempts / 60 seconds</b>
-        </div>
-        <div class="campaign-meta">
-          <span>Credential Access</span>
-          <strong>T1110 · Brute Force</strong>
-        </div>
-      </article>
+      <div class="campaign-stat">
+        <span>SCENARIOS</span>
+        <b id="campaignTotal">0</b>
+        <small>Validation scenarios</small>
+      </div>
 
-      <article class="campaign-card" data-campaign="portscan">
-        <div class="campaign-card-top">
-          <span class="campaign-icon">⌁</span>
-          <span id="campaignStatusScan" class="campaign-status monitoring">MONITORING</span>
-        </div>
-        <h3>Network Service Scanning</h3>
-        <p class="campaign-description">
-          Detects TCP reconnaissance against multiple destination ports on the monitored host.
-        </p>
-        <div class="campaign-rule">
-          <span>TRIGGER</span>
-          <b>8+ TCP ports / 60 seconds</b>
-        </div>
-        <div class="campaign-meta">
-          <span>Discovery</span>
-          <strong>T1046 · Network Service Scanning</strong>
-        </div>
-      </article>
+      <div class="campaign-stat">
+        <span>DETECTED</span>
+        <b id="campaignDetected">0</b>
+        <small>Observed detection activity</small>
+      </div>
 
-      <article class="campaign-card" data-campaign="privilege">
-        <div class="campaign-card-top">
-          <span class="campaign-icon">⬆</span>
-          <span id="campaignStatusPriv" class="campaign-status monitoring">MONITORING</span>
-        </div>
-        <h3>Privilege Escalation</h3>
-        <p class="campaign-description">
-          Detects observed privilege changes associated with elevated access activity.
-        </p>
-        <div class="campaign-rule">
-          <span>TRIGGER</span>
-          <b>Privilege change observed</b>
-        </div>
-        <div class="campaign-meta">
-          <span>Privilege Escalation</span>
-          <strong>T1548 · Abuse Elevation Control Mechanism</strong>
-        </div>
-      </article>
+      <div class="campaign-stat">
+        <span>MONITORING</span>
+        <b id="campaignMonitoring">0</b>
+        <small>Awaiting trigger activity</small>
+      </div>
+
+      <div class="campaign-stat">
+        <span>RELATED ALERTS</span>
+        <b id="campaignAlerts">0</b>
+        <small>Detection engine output</small>
+      </div>
+
+      <div class="campaign-stat">
+        <span>MITRE TECHNIQUES</span>
+        <b id="campaignTechniques">0</b>
+        <small>Mapped techniques</small>
+      </div>
 
     </div>
 
-    <div class="campaign-footer">
-      <span>●</span>
-      <span>Linux auth logs + Scapy packet sensing</span>
-      <span class="campaign-divider">|</span>
-      <span>Detection engine: ACTIVE</span>
-    </div>
   </div>
+
+  <div class="panel">
+
+    <div class="panel-head">
+      <div>
+        <h2>Validation Scenarios</h2>
+        <span class="muted">Detection coverage across controlled attack patterns</span>
+      </div>
+
+      <span id="campaignUpdated" class="muted">
+        Not evaluated
+      </span>
+    </div>
+
+    <div id="campaignGrid" class="campaign-grid"></div>
+
+  </div>
+
+  <div class="panel">
+
+    <div class="panel-head">
+      <div>
+        <h2>Recent Campaign Activity</h2>
+        <span class="muted">Telemetry associated with validation scenarios</span>
+      </div>
+    </div>
+
+    <div id="campaignActivity"></div>
+
+  </div>
+
 </section>
 <section id="assets" class="tab hidden">
   <div class="panel">
