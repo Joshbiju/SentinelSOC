@@ -1,6 +1,6 @@
 <!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SentinelSOC Command Center</title><link rel="stylesheet" href="/static/style.css"><script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script></head><body>
 <div class="app-shell"><aside class="sidebar"><div class="brand">SentinelSOC</div><div class="brand-sub">Security Operations<br>Center</div><nav>
-<button class="nav active" onclick="showTab('overview',this)">▦ <span>Dashboard</span></button><button class="nav" onclick="showTab('alerts',this)">♢ <span>Alerts</span></button><button class="nav" onclick="showTab('incidents',this)">♧ <span>Incidents</span></button><button class="nav" onclick="showTab('campaigns',this)">◉ <span>Attack Campaigns</span></button><button class="nav" onclick="showTab('assets',this)">▤ <span>Assets</span></button><button class="nav" onclick="showTab('intel',this)">◎ <span>Threat Intel</span></button><button class="nav" onclick="showTab('rules',this)">◈ <span>Detection Rules</span></button><button class="nav" onclick="showTab('blocked',this)">⊘ <span>IP Management</span></button><button class="nav" onclick="showTab('reports',this)">▧ <span>Reports</span></button><button class="nav" onclick="showTab('settings',this)">⚙ <span>Settings</span></button>
+<button class="nav active" onclick="showTab('overview',this)">▦ <span>Dashboard</span></button><button class="nav" onclick="showTab('events',this)">⌁ <span>Events</span></button><button class="nav" onclick="showTab('alerts',this)">♢ <span>Alerts</span></button><button class="nav" onclick="showTab('incidents',this)">♧ <span>Incidents</span></button><button class="nav" onclick="showTab('campaigns',this)">◉ <span>Attack Campaigns</span></button><button class="nav" onclick="showTab('assets',this)">▤ <span>Assets</span></button><button class="nav" onclick="showTab('intel',this)">◎ <span>Threat Intel</span></button><button class="nav" onclick="showTab('rules',this)">◈ <span>Detection Rules</span></button><button class="nav" onclick="showTab('blocked',this)">⊘ <span>IP Management</span></button><button class="nav" onclick="showTab('reports',this)">▧ <span>Reports</span></button><button class="nav" onclick="showTab('settings',this)">⚙ <span>Settings</span></button>
 <button class="nav-item" onclick="showTab('command-guard')" data-tab="command-guard">
   <span>◈</span> Command Guard
 </button>
@@ -12,7 +12,106 @@
 <div class="chart-grid"><div class="panel"><div class="panel-head"><h2>Event Frequency — Last 24 Hours</h2><span class="muted">Z-score anomaly ≥ 2.5</span></div><canvas id="trendChart"></canvas></div><div class="panel"><div class="panel-head"><h2>Alert Severity</h2></div><canvas id="severityChart"></canvas></div></div>
 <div class="two-col"><div class="panel"><h2>⚠ Top Attack Types</h2><div id="attackTypes" class="empty">Waiting for security events</div></div><div class="panel"><h2>◎ Top Source IPs</h2><div id="sources" class="list"></div></div></div>
 <div class="panel"><div class="panel-head"><h2>⌁ Live Security Events</h2><button onclick="showTab('events')">View all</button></div><div id="live"></div></div></section>
-<section id="events" class="tab hidden"><div class="panel"><div class="panel-head"><h2>Event Explorer</h2><span id="eventFilterLabel" class="muted"></span></div><div id="eventTable"></div></div></section>
+<section id="events" class="tab hidden">
+
+  <div class="panel">
+    <div class="panel-head">
+      <div>
+        <h2>Security Event Explorer</h2>
+        <span class="muted">Unified telemetry investigation and event analysis</span>
+      </div>
+      <span class="live-pill">LIVE TELEMETRY</span>
+    </div>
+
+    <div class="event-overview">
+
+      <div class="event-stat">
+        <span>TOTAL EVENTS</span>
+        <b id="eventTotal">0</b>
+        <small>Collected telemetry</small>
+      </div>
+
+      <div class="event-stat">
+        <span>SECURITY EVENTS</span>
+        <b id="eventSecurity">0</b>
+        <small>Non-inventory activity</small>
+      </div>
+
+      <div class="event-stat">
+        <span>AUTH EVENTS</span>
+        <b id="eventAuth">0</b>
+        <small>Login and account activity</small>
+      </div>
+
+      <div class="event-stat">
+        <span>NETWORK EVENTS</span>
+        <b id="eventNetwork">0</b>
+        <small>Network telemetry</small>
+      </div>
+
+      <div class="event-stat">
+        <span>HIGH / CRITICAL</span>
+        <b id="eventPriority">0</b>
+        <small>Priority telemetry</small>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="panel">
+
+    <div class="panel-head">
+      <div>
+        <h2>Telemetry Search</h2>
+        <span id="eventFilterLabel" class="muted">Showing latest events</span>
+      </div>
+      <span id="eventCount" class="muted">0 events</span>
+    </div>
+
+    <div class="event-controls">
+
+      <input
+        id="eventSearch"
+        type="text"
+        placeholder="Search events, users, processes, IPs..."
+        oninput="renderEvents()">
+
+      <select id="eventSeverityFilter" onchange="renderEvents()">
+        <option value="all">All severities</option>
+        <option value="critical">Critical</option>
+        <option value="high">High</option>
+        <option value="medium">Medium</option>
+        <option value="low">Low</option>
+      </select>
+
+      <select id="eventTypeFilter" onchange="renderEvents()">
+        <option value="all">All event types</option>
+      </select>
+
+      <button type="button" onclick="loadEvents()">↻ Refresh</button>
+
+      <button type="button" onclick="clearEventExplorer()">
+        Clear filters
+      </button>
+
+    </div>
+
+  </div>
+
+  <div class="panel">
+
+    <div class="panel-head">
+      <div>
+        <h2>Event Timeline</h2>
+        <span class="muted">Latest security and system telemetry</span>
+      </div>
+    </div>
+
+    <div id="eventTable" class="event-grid"></div>
+
+  </div>
+
+</section>
 <section id="alerts" class="tab hidden">
 
   <div class="panel">

@@ -196,6 +196,8 @@ async function drawCharts(){
    EVENTS
    ========================= */
 
+let eventCache = [];
+
 async function loadEvents(srcIp="", threatType=""){
   try{
     let url="/api/v2/events?limit=180";
@@ -208,30 +210,273 @@ async function loadEvents(srcIp="", threatType=""){
 
     const events = await get(url);
 
-    const container = $("eventTable");
-    if(!container) return;
+    eventCache = events || [];
 
-    container.innerHTML =
-      events.map(x=>`
-        <div class="event">
-          <b>${esc(x.event_type)}</b>
-          <span class="badge ${esc(x.severity)}">
-            ${esc(x.severity)}
-          </span>
-          <small>
-            ${esc(x.timestamp)}
-            · ${esc(x.src_ip || "local")}
-            ${x.dst_port ? " · port " + esc(x.dst_port) : ""}
-          </small>
-          <p>${esc(x.message || x.raw || "")}</p>
-        </div>
-      `).join("") ||
-      '<div class="empty">No telemetry events</div>';
+    updateEventOverview();
+    populateEventTypeFilter();
+    renderEvents();
 
   }catch(err){
     console.error("[SentinelSOC] events:",err);
   }
 }
+
+function updateEventOverview(){
+
+  const inventoryTypes = [
+    "system_metrics",
+    "network_inventory",
+    "process_inventory"
+  ];
+
+  const security = eventCache.filter(x =>
+    !inventoryTypes.includes(
+      String(x.event_type || "").toLowerCase()
+    )
+  );
+
+  const auth = eventCache.filter(x =>
+    /auth|login|account|privilege/i.test(
+      String(x.event_type || "") + " " +
+      String(x.message || "")
+    )
+  );
+
+  const network = eventCache.filter(x =>
+    /network|connection|scan|traffic|socket/i.test(
+      String(x.event_type || "") + " " +
+      String(x.message || "")
+    )
+  );
+
+  const priority = eventCache.filter(x =>
+    ["high","critical"].includes(
+      String(x.severity || "").toLowerCase()
+    )
+  );
+
+  setText("eventTotal", eventCache.length);
+  setText("eventSecurity", security.length);
+  setText("eventAuth", auth.length);
+  setText("eventNetwork", network.length);
+  setText("eventPriority", priority.length);
+}
+
+function populateEventTypeFilter(){
+
+  const select = $("eventTypeFilter");
+
+  if(!select){
+    return;
+  }
+
+  const current = select.value;
+
+  const types = [
+    ...new Set(
+      eventCache
+        .map(x => String(x.event_type || "unknown"))
+        .filter(Boolean)
+    )
+  ].sort();
+
+  select.innerHTML =
+    '<option value="all">All event types</option>' +
+    types.map(type =>
+      `<option value="${esc(type)}">${esc(type)}</option>`
+    ).join("");
+
+  if(types.includes(current)){
+    select.value = current;
+  }
+}
+
+function renderEvents(){
+
+  const container = $("eventTable");
+
+  if(!container){
+    return;
+  }
+
+  const search =
+    String($("eventSearch")?.value || "")
+      .trim()
+      .toLowerCase();
+
+  const severity =
+    String($("eventSeverityFilter")?.value || "all")
+      .toLowerCase();
+
+  const type =
+    String($("eventTypeFilter")?.value || "all")
+      .toLowerCase();
+
+  const filtered = eventCache.filter(x => {
+
+    const itemSeverity =
+      String(x.severity || "low").toLowerCase();
+
+    const itemType =
+      String(x.event_type || "unknown").toLowerCase();
+
+    const haystack = [
+      x.event_type,
+      x.message,
+      x.user,
+      x.src_ip,
+      x.dst_ip,
+      x.process,
+      x.command,
+      x.protocol,
+      x.raw
+    ]
+      .map(v => String(v || "").toLowerCase())
+      .join(" ");
+
+    return (
+      (!search || haystack.includes(search)) &&
+      (severity === "all" || itemSeverity === severity) &&
+      (type === "all" || itemType === type)
+    );
+  });
+
+  setText(
+    "eventCount",
+    filtered.length +
+      (filtered.length === 1 ? " event" : " events")
+  );
+
+  container.innerHTML =
+    filtered.map(x => {
+
+      const sev =
+        String(x.severity || "low").toLowerCase();
+
+      const type =
+        String(x.event_type || "unknown");
+
+      const source =
+        x.src_ip || "local";
+
+      const destination =
+        x.dst_ip
+          ? x.dst_ip +
+            (x.dst_port ? ":" + x.dst_port : "")
+          : "";
+
+      return `
+        <div class="event-card">
+
+          <div class="event-card-head">
+
+            <div class="event-card-title">
+
+              <span class="event-id">
+                EVT-${String(x.id ?? "").padStart(6,"0")}
+              </span>
+
+              <span class="event-type">
+                ${esc(type)}
+              </span>
+
+              <span class="event-severity ${esc(sev)}">
+                ${esc(sev.toUpperCase())}
+              </span>
+
+            </div>
+
+            <span class="event-time">
+              ${esc(x.timestamp || "")}
+            </span>
+
+          </div>
+
+          <div class="event-message">
+            ${esc(
+              x.message ||
+              x.raw ||
+              "No event message available."
+            )}
+          </div>
+
+          <div class="event-meta">
+
+            <div>
+              <span>SOURCE</span>
+              <b>${esc(source)}</b>
+            </div>
+
+            <div>
+              <span>DESTINATION</span>
+              <b>${esc(destination || "—")}</b>
+            </div>
+
+            <div>
+              <span>USER</span>
+              <b>${esc(x.user || "—")}</b>
+            </div>
+
+            <div>
+              <span>PROCESS</span>
+              <b>${esc(x.process || "—")}</b>
+            </div>
+
+            <div>
+              <span>PROTOCOL</span>
+              <b>${esc(x.protocol || "—")}</b>
+            </div>
+
+            <div>
+              <span>PORT</span>
+              <b>${esc(x.dst_port || "—")}</b>
+            </div>
+
+          </div>
+
+          <div class="event-footer">
+
+            <span>
+              Source:
+              ${esc(x.source || "local_monitor")}
+            </span>
+
+            ${
+              x.command
+                ? `<span>Command: ${esc(x.command)}</span>`
+                : ""
+            }
+
+          </div>
+
+        </div>
+      `;
+
+    }).join("")
+    || '<div class="empty">No telemetry events match the current filters</div>';
+
+  setText(
+    "eventFilterLabel",
+    search || severity !== "all" || type !== "all"
+      ? "Filtered telemetry results"
+      : "Showing latest events"
+  );
+}
+
+function clearEventExplorer(){
+
+  if($("eventSearch"))
+    $("eventSearch").value = "";
+
+  if($("eventSeverityFilter"))
+    $("eventSeverityFilter").value = "all";
+
+  if($("eventTypeFilter"))
+    $("eventTypeFilter").value = "all";
+
+  renderEvents();
+}
+
 
 /* =========================
    ALERTS / L1 TRIAGE
